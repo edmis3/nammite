@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>NutriTrack</title>
+<title>Ņammīte Edmis</title>
 <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -186,7 +186,7 @@ body{font-family:var(--font);color:var(--text);-webkit-font-smoothing:antialiase
 .dd-meal-time{font-size:10px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
 .dd-meal-k{font-size:13px;font-weight:800;color:var(--text);white-space:nowrap;margin-left:auto}
 .month-sum{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-@media(min-width:460px){.month-sum{grid-template-columns:repeat(4,1fr)}}
+@media(min-width:460px){.month-sum{grid-template-columns:repeat(3,1fr)}}
 .ms-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px;box-shadow:var(--shadow-sm)}
 .ms-lbl{font-size:9.5px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px}
 .ms-val{font-size:19px;font-weight:800;letter-spacing:-0.3px}
@@ -259,8 +259,8 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 <!-- SETUP -->
 <div id="setup">
   <div class="setup-wrap">
-    <div class="setup-logo">NT</div>
-    <h1>NutriTrack</h1>
+    <div class="setup-logo">ŅE</div>
+    <h1>Ņammīte Edmis</h1>
     <p>Personīgais AI uztura trackeris.<br>Ievadi Anthropic API atslēgu, lai sāktu.</p>
     <div class="setup-steps">
       <div class="ss"><div class="ss-n">1</div><p>Atver <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> un reģistrējies</p></div>
@@ -277,7 +277,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 <!-- APP -->
 <div id="app">
   <div class="app-bar">
-    <div class="app-logo"><span class="logo-pip"></span>NutriTrack</div>
+    <div class="app-logo"><span class="logo-pip"></span>Ņammīte Edmis</div>
     <div style="display:flex;align-items:center;gap:12px">
       <span class="hdate" id="hdate"></span>
       <button class="icon-btn" onclick="openSettings()" title="Iestatījumi">⚙</button>
@@ -288,6 +288,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <div class="tabs">
       <button class="tab active" onclick="goTab('today')">Šodiena</button>
       <button class="tab" onclick="goTab('month')">Mēnesis</button>
+      <button class="tab" onclick="goTab('add')">Pievienot</button>
       <button class="tab" onclick="goTab('ai')">AI palīgs</button>
     </div>
   </div>
@@ -295,32 +296,6 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   <!-- TODAY -->
   <div id="tab-today" class="sec active">
     <div class="mc-grid" id="mcCards"></div>
-    <div class="panel">
-      <div class="panel-hd"><span class="panel-icon">+</span>Pievienot ēdienreizi</div>
-      <div class="frow">
-        <div class="fg fg-name">
-          <label>Produkts / ēdiens</label>
-          <input type="text" id="mName" placeholder="Piemēram: vistas krūtiņa 180g" onkeydown="if(event.key==='Enter')addMeal()">
-        </div>
-        <div class="fg fg-time">
-          <label>Ēdienreize</label>
-          <select id="mTime">
-            <option>Brokastis</option><option>Uzkoda</option>
-            <option selected>Pusdienas</option><option>Pēcpusdiena</option>
-            <option>Vakariņas</option><option>Pirms gulēt</option>
-          </select>
-        </div>
-      </div>
-      <div class="fgrid">
-        <div class="fg"><label>Kcal</label><input type="number" id="mKcal" placeholder="0" min="0"></div>
-        <div class="fg"><label>Proteīns g</label><input type="number" id="mProt" placeholder="0" min="0"></div>
-        <div class="fg"><label>Ogļhidrāti g</label><input type="number" id="mCarb" placeholder="0" min="0"></div>
-        <div class="fg"><label>Tauki g</label><input type="number" id="mFat" placeholder="0" min="0"></div>
-      </div>
-      <button class="btn-add" onclick="addMeal()" style="margin-bottom:14px">Pievienot ēdienreizi</button>
-      <div class="ql">Bieži lietotie (no vēstures)</div>
-      <div class="qrow" id="qrow"></div>
-    </div>
     <div class="list-hd">
       <div class="list-lbl">Šodienas ēdienreizes</div>
       <button class="clr-btn" onclick="clearToday()">Dzēst visu</button>
@@ -351,6 +326,36 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <div class="month-sum" id="monthSum"></div>
   </div>
 
+  <!-- ADD -->
+  <div id="tab-add" class="sec">
+    <div class="panel">
+      <div class="panel-hd"><span class="panel-icon">+</span>Pievienot ēdienreizi</div>
+      <div class="frow">
+        <div class="fg fg-name">
+          <label>Produkts / ēdiens</label>
+          <input type="text" id="mName" placeholder="Piemēram: vistas krūtiņa 180g" onkeydown="if(event.key==='Enter')addMealAndSwitch()">
+        </div>
+        <div class="fg fg-time">
+          <label>Ēdienreize</label>
+          <select id="mTime">
+            <option>Brokastis</option><option>Uzkoda</option>
+            <option selected>Pusdienas</option><option>Pēcpusdiena</option>
+            <option>Vakariņas</option><option>Pirms gulēt</option>
+          </select>
+        </div>
+      </div>
+      <div class="fgrid">
+        <div class="fg"><label>Kcal</label><input type="number" id="mKcal" placeholder="0" min="0"></div>
+        <div class="fg"><label>Proteīns g</label><input type="number" id="mProt" placeholder="0" min="0"></div>
+        <div class="fg"><label>Ogļhidrāti g</label><input type="number" id="mCarb" placeholder="0" min="0"></div>
+        <div class="fg"><label>Tauki g</label><input type="number" id="mFat" placeholder="0" min="0"></div>
+      </div>
+      <button class="btn-add" onclick="addMealAndSwitch()" style="margin-bottom:14px;width:100%">Pievienot ēdienreizi</button>
+      <div class="ql">Bieži lietotie (no vēstures)</div>
+      <div class="qrow" id="qrow"></div>
+    </div>
+  </div>
+
   <!-- AI -->
   <div id="tab-ai" class="sec">
     <div class="ai-panel">
@@ -361,12 +366,6 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
         <div class="photo-drop-icon">📷</div>
         <p>Nofotografē šķīvi vai ievelc attēlu šeit</p>
         <small>JPG, PNG, HEIC · maks. 5MB</small>
-      </div>
-      <div id="photoCommentWrap" style="display:none;margin-bottom:10px">
-        <div class="fg">
-          <label>Papildu komentārs (pēc izvēles)</label>
-          <input type="text" id="photoComment" placeholder="Piemēram: porcija bija maza, bez mērces, + maize..." style="padding:9px 11px;font-size:13.5px;font-family:var(--font);background:var(--bg3);border:1.5px solid var(--border);border-radius:var(--r);color:var(--text);outline:none;transition:border .2s;width:100%" onkeydown="if(event.key==='Enter')analyzePhoto()">
-        </div>
       </div>
       <button class="btn-an" id="btnPhoto" onclick="analyzePhoto()" style="width:100%;display:none">Analizēt foto →</button>
       <div class="ai-res" id="aiPhotoRes"></div>
@@ -386,32 +385,6 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
         <button class="btn-an" id="btnAdv" onclick="getAdvice()">Jautāt</button>
       </div>
       <div class="ai-res" id="aiAdvRes"></div>
-    </div>
-  </div>
-</div>
-
-<!-- AI EDIT & ADD OVERLAY -->
-<div class="overlay" id="aiEditOv" onclick="aiEditOvClick(event)">
-  <div class="sheet">
-    <h3>Rediģēt un pievienot</h3>
-    <div class="sfg"><label>Nosaukums</label><input type="text" id="aeNm"></div>
-    <div class="sfg"><label>Kategorija / ēdienreize</label>
-      <select id="aeCat">
-        <option>Brokastis</option><option>Uzkoda</option><option selected>Pusdienas</option>
-        <option>Pēcpusdiena</option><option>Vakariņas</option><option>Pirms gulēt</option>
-      </select>
-    </div>
-    <div class="ssub">Uzturvērtības</div>
-    <div class="sgrid">
-      <div class="sfg"><label>Kcal</label><input type="number" id="aeKcal" min="0"></div>
-      <div class="sfg"><label>Proteīns g</label><input type="number" id="aeProt" min="0"></div>
-      <div class="sfg"><label>Ogļhidrāti g</label><input type="number" id="aeCarb" min="0"></div>
-      <div class="sfg"><label>Tauki g</label><input type="number" id="aeFat" min="0"></div>
-    </div>
-    <input type="hidden" id="aeImg">
-    <div class="srow">
-      <button class="btn-cx" onclick="closeAiEdit()">Atcelt</button>
-      <button class="btn-sv" onclick="confirmAiEdit()">Pievienot sarakstam</button>
     </div>
   </div>
 </div>
@@ -470,6 +443,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   <div class="bnav-inner">
     <button class="nb active" id="nb-today" onclick="goTab('today')"><span class="nb-icon">◎</span>Šodiena</button>
     <button class="nb" id="nb-month" onclick="goTab('month')"><span class="nb-icon">▦</span>Mēnesis</button>
+    <button class="nb" id="nb-add" onclick="goTab('add')"><span class="nb-icon">＋</span>Pievienot</button>
     <button class="nb" id="nb-ai" onclick="goTab('ai')"><span class="nb-icon">✦</span>AI palīgs</button>
   </div>
 </div>
@@ -633,6 +607,11 @@ function quickFill(name,kcal,prot,carb,fat){
   document.getElementById('mFat').value=fat;
 }
 
+function addMealAndSwitch(extra){
+  addMeal(extra);
+  if(!extra)goTab('today');
+}
+
 function addMeal(extra){
   const name=(extra&&extra.name)||document.getElementById('mName').value.trim();
   if(!name){document.getElementById('mName').focus();return;}
@@ -686,11 +665,14 @@ function renderMonth(){
   }
   document.getElementById('calGrid').innerHTML=html;
   const avg=v=>activeDays?Math.round(v/activeDays):0;
+  const pctAvg=avg(totK)?Math.round(avg(totK)/T.kcal*100):0;
   document.getElementById('monthSum').innerHTML=`
-    <div class="ms-card"><div class="ms-lbl">Kopā kcal</div><div class="ms-val" style="color:var(--green)">${totK}</div><div class="ms-sub">${activeDays} dienas</div></div>
-    <div class="ms-card"><div class="ms-lbl">Vidēji kcal</div><div class="ms-val">${avg(totK)}</div><div class="ms-sub">Mērķis: ${T.kcal}</div></div>
-    <div class="ms-card"><div class="ms-lbl">Vidēji proteīns</div><div class="ms-val" style="color:var(--blue)">${avg(totP)}g</div><div class="ms-sub">Mērķis: ${T.prot}g</div></div>
-    <div class="ms-card"><div class="ms-lbl">Mērķa izpilde</div><div class="ms-val" style="color:var(--accent)">${avg(totK)?Math.round(avg(totK)/T.kcal*100):0}%</div><div class="ms-sub">kaloriju mērķis</div></div>`;
+    <div class="ms-card"><div class="ms-lbl">Kopā kcal</div><div class="ms-val" style="color:var(--green)">${totK}</div><div class="ms-sub">${activeDays} dienas ar ierakstiem</div></div>
+    <div class="ms-card"><div class="ms-lbl">Vid. kcal / dienā</div><div class="ms-val">${avg(totK)}</div><div class="ms-sub">Mērķis: ${T.kcal} · ${pctAvg}%</div></div>
+    <div class="ms-card"><div class="ms-lbl">Vid. proteīns</div><div class="ms-val" style="color:var(--blue)">${avg(totP)}g</div><div class="ms-sub">Mērķis: ${T.prot}g · ${activeDays?Math.round(avg(totP)/T.prot*100):0}%</div></div>
+    <div class="ms-card"><div class="ms-lbl">Vid. ogļhidrāti</div><div class="ms-val" style="color:var(--amber)">${avg(totC)}g</div><div class="ms-sub">Mērķis: ${T.carb}g · ${activeDays?Math.round(avg(totC)/T.carb*100):0}%</div></div>
+    <div class="ms-card"><div class="ms-lbl">Vid. tauki</div><div class="ms-val" style="color:var(--pink)">${avg(totF)}g</div><div class="ms-sub">Mērķis: ${T.fat}g · ${activeDays?Math.round(avg(totF)/T.fat*100):0}%</div></div>
+    <div class="ms-card"><div class="ms-lbl">Kaloriju mērķis</div><div class="ms-val" style="color:var(--accent)">${pctAvg}%</div><div class="ms-sub">vidēji no mērķa</div></div>`;
 }
 
 function openDay(key,d,evt){
@@ -737,7 +719,6 @@ function onPhotoSelect(e){
     const img=document.getElementById('photoPreviewImg');
     img.src=src;img.style.display='block';
     document.getElementById('photoDrop').style.display='none';
-    document.getElementById('photoCommentWrap').style.display='block';
     document.getElementById('btnPhoto').style.display='block';
   };
   reader.readAsDataURL(file);
@@ -755,7 +736,7 @@ async function analyzePhoto(){
       headers:{'Content-Type':'application/json','x-api-key':getKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
       body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,
         system:`Tu esi uztura speciālists. Alerģija: olas, govs piens, kviešu milti. Mērķi: ${T.kcal} kcal, ${T.prot}g proteīns. Atbildi TIKAI ar JSON bez markdown: {"name":"ēdiena nosaukums","kcal":skaitlis,"prot":skaitlis,"carb":skaitlis,"fat":skaitlis,"note":"komentārs latviski"}`,
-        messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:photoB64Type,data:photoB64}},{type:'text',text:'Analizē šī attēlā redzamo ēdienu un aprēķini uzturvērtības.'+(document.getElementById('photoComment').value.trim()?(' Papildu info: '+document.getElementById('photoComment').value.trim()):'') }]}]
+        messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:photoB64Type,data:photoB64}},{type:'text',text:'Analizē šī attēlā redzamo ēdienu un aprēķini uzturvērtības.'}]}]
       })
     });
     if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e?.error?.message||'HTTP '+r.status);}
@@ -763,7 +744,7 @@ async function analyzePhoto(){
     const text=data.content.map(c=>c.text||'').join('');
     const p=JSON.parse(text.replace(/```json|```/g,'').trim());
     const imgSrc=document.getElementById('photoPreviewImg').src;
-    res.innerHTML=`<div class="ai-card"><div class="ai-rn">${p.name}</div><div class="ai-chips"><span class="aic k">${p.kcal} kcal</span><span class="aic p">P: ${p.prot}g</span><span class="aic c">C: ${p.carb}g</span><span class="aic f">T: ${p.fat}g</span></div><div class="ai-note">${p.note}</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn-add-ai" onclick='addFromAI(${JSON.stringify({...p,img:imgSrc}).replace(/'/g,"&#39;")})'>+ Pievienot tūlīt</button><button class="btn-add-ai" style="background:var(--blue-bg);border-color:var(--accent);color:var(--accent)" onclick='openAiEdit(${JSON.stringify({...p,img:imgSrc}).replace(/'/g,"&#39;")})'>✏ Rediģēt un pievienot</button></div></div>`;
+    res.innerHTML=`<div class="ai-card"><div class="ai-rn">${p.name}</div><div class="ai-chips"><span class="aic k">${p.kcal} kcal</span><span class="aic p">P: ${p.prot}g</span><span class="aic c">C: ${p.carb}g</span><span class="aic f">T: ${p.fat}g</span></div><div class="ai-note">${p.note}</div><button class="btn-add-ai" onclick='addFromAI(${JSON.stringify({...p,img:imgSrc}).replace(/'/g,"&#39;")})'>+ Pievienot šodienas sarakstam</button></div>`;
   }catch(e){res.innerHTML=`<div class="ai-card"><div style="color:var(--red);font-size:12.5px;line-height:1.6"><strong>Kļūda:</strong> ${e.message}<br>Pārbaudi API atslēgu un konta kredītu (console.anthropic.com → Billing)</div></div>`;}
   finally{btn.disabled=false;}
 }
@@ -773,8 +754,6 @@ function resetPhoto(){
   document.getElementById('photoPreviewImg').style.display='none';
   document.getElementById('photoPreviewImg').src='';
   document.getElementById('photoDrop').style.display='block';
-  document.getElementById('photoCommentWrap').style.display='none';
-  document.getElementById('photoComment').value='';
   document.getElementById('btnPhoto').style.display='none';
   document.getElementById('photoFile').value='';
   document.getElementById('aiPhotoRes').className='ai-res';
@@ -790,7 +769,7 @@ async function analyzeText(){
   if(!text)return;
   try{
     const p=JSON.parse(text.replace(/```json|```/g,'').trim());
-    document.getElementById('aiTxtRes').innerHTML=`<div class="ai-card"><div class="ai-rn">${p.name}</div><div class="ai-chips"><span class="aic k">${p.kcal} kcal</span><span class="aic p">P: ${p.prot}g</span><span class="aic c">C: ${p.carb}g</span><span class="aic f">T: ${p.fat}g</span></div><div class="ai-note">${p.note}</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn-add-ai" onclick='addFromAI(${JSON.stringify(p).replace(/'/g,"&#39;")})'>+ Pievienot tūlīt</button><button class="btn-add-ai" style="background:var(--blue-bg);border-color:var(--accent);color:var(--accent)" onclick='openAiEdit(${JSON.stringify(p).replace(/'/g,"&#39;")})'>✏ Rediģēt un pievienot</button></div></div>`;
+    document.getElementById('aiTxtRes').innerHTML=`<div class="ai-card"><div class="ai-rn">${p.name}</div><div class="ai-chips"><span class="aic k">${p.kcal} kcal</span><span class="aic p">P: ${p.prot}g</span><span class="aic c">C: ${p.carb}g</span><span class="aic f">T: ${p.fat}g</span></div><div class="ai-note">${p.note}</div><button class="btn-add-ai" onclick='addFromAI(${JSON.stringify(p).replace(/'/g,"&#39;")})'>+ Pievienot šodienas sarakstam</button></div>`;
   }catch{document.getElementById('aiTxtRes').innerHTML='<div style="color:var(--red);font-size:12.5px">Kļūda parsējot. Mēģini vēlreiz.</div>';}
 }
 
@@ -827,13 +806,14 @@ async function aiCall(sys,usr,btnId,resId){
 
 // ── NAV ──
 function goTab(tab){
-  const tabs=['today','month','ai'];
+  const tabs=['today','month','add','ai'];
   document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',tabs[i]===tab));
   document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.nb').forEach((b,i)=>b.classList.toggle('active',tabs[i]===tab));
   document.getElementById('tab-'+tab).classList.add('active');
   if(tab==='month')renderMonth();
   if(tab==='ai')resetPhoto();
+  if(tab==='add')renderQuick();
 }
 
 // ── SETTINGS ──
@@ -867,41 +847,6 @@ function clearAllData(){
   if(t)localStorage.setItem('nt_tgt',t);
   renderCards();renderMeals();renderQuick();
   closeSettings();alert('Visi ēdienreižu dati dzēsti.');
-}
-
-// ── AI EDIT MODAL ──
-function openAiEdit(p){
-  document.getElementById('aeNm').value=p.name||'';
-  document.getElementById('aeKcal').value=p.kcal||0;
-  document.getElementById('aeProt').value=p.prot||0;
-  document.getElementById('aeCarb').value=p.carb||0;
-  document.getElementById('aeFat').value=p.fat||0;
-  document.getElementById('aeImg').value=p.img||'';
-  // pre-select category based on current time
-  const h=new Date().getHours();
-  const cat=h<10?'Brokastis':h<12?'Uzkoda':h<15?'Pusdienas':h<17?'Pēcpusdiena':h<21?'Vakariņas':'Pirms gulēt';
-  const sel=document.getElementById('aeCat');
-  for(let i=0;i<sel.options.length;i++){if(sel.options[i].value===cat){sel.selectedIndex=i;break;}}
-  document.getElementById('aiEditOv').classList.add('open');
-}
-function closeAiEdit(){document.getElementById('aiEditOv').classList.remove('open');}
-function aiEditOvClick(e){if(e.target.id==='aiEditOv')closeAiEdit();}
-function confirmAiEdit(){
-  const meal={
-    name:document.getElementById('aeNm').value.trim()||'Nezināms ēdiens',
-    kcal:parseInt(document.getElementById('aeKcal').value)||0,
-    prot:parseInt(document.getElementById('aeProt').value)||0,
-    carb:parseInt(document.getElementById('aeCarb').value)||0,
-    fat:parseInt(document.getElementById('aeFat').value)||0,
-    img:document.getElementById('aeImg').value||null,
-    time:document.getElementById('aeCat').value
-  };
-  const meals=getMeals(todayKey());
-  meals.push(meal);
-  saveMeals(todayKey(),meals);
-  renderCards();renderMeals();renderQuick();
-  closeAiEdit();
-  goTab('today');
 }
 
 init();
