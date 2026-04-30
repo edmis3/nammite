@@ -362,6 +362,12 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
         <p>Nofotografē šķīvi vai ievelc attēlu šeit</p>
         <small>JPG, PNG, HEIC · maks. 5MB</small>
       </div>
+      <div id="photoCommentWrap" style="display:none;margin-bottom:10px">
+        <div class="fg">
+          <label>Papildu komentārs (pēc izvēles)</label>
+          <input type="text" id="photoComment" placeholder="Piemēram: porcija bija maza, bez mērces, + maize..." style="padding:9px 11px;font-size:13.5px;font-family:var(--font);background:var(--bg3);border:1.5px solid var(--border);border-radius:var(--r);color:var(--text);outline:none;transition:border .2s;width:100%" onkeydown="if(event.key==='Enter')analyzePhoto()">
+        </div>
+      </div>
       <button class="btn-an" id="btnPhoto" onclick="analyzePhoto()" style="width:100%;display:none">Analizēt foto →</button>
       <div class="ai-res" id="aiPhotoRes"></div>
     </div>
@@ -380,6 +386,32 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
         <button class="btn-an" id="btnAdv" onclick="getAdvice()">Jautāt</button>
       </div>
       <div class="ai-res" id="aiAdvRes"></div>
+    </div>
+  </div>
+</div>
+
+<!-- AI EDIT & ADD OVERLAY -->
+<div class="overlay" id="aiEditOv" onclick="aiEditOvClick(event)">
+  <div class="sheet">
+    <h3>Rediģēt un pievienot</h3>
+    <div class="sfg"><label>Nosaukums</label><input type="text" id="aeNm"></div>
+    <div class="sfg"><label>Kategorija / ēdienreize</label>
+      <select id="aeCat">
+        <option>Brokastis</option><option>Uzkoda</option><option selected>Pusdienas</option>
+        <option>Pēcpusdiena</option><option>Vakariņas</option><option>Pirms gulēt</option>
+      </select>
+    </div>
+    <div class="ssub">Uzturvērtības</div>
+    <div class="sgrid">
+      <div class="sfg"><label>Kcal</label><input type="number" id="aeKcal" min="0"></div>
+      <div class="sfg"><label>Proteīns g</label><input type="number" id="aeProt" min="0"></div>
+      <div class="sfg"><label>Ogļhidrāti g</label><input type="number" id="aeCarb" min="0"></div>
+      <div class="sfg"><label>Tauki g</label><input type="number" id="aeFat" min="0"></div>
+    </div>
+    <input type="hidden" id="aeImg">
+    <div class="srow">
+      <button class="btn-cx" onclick="closeAiEdit()">Atcelt</button>
+      <button class="btn-sv" onclick="confirmAiEdit()">Pievienot sarakstam</button>
     </div>
   </div>
 </div>
@@ -705,6 +737,7 @@ function onPhotoSelect(e){
     const img=document.getElementById('photoPreviewImg');
     img.src=src;img.style.display='block';
     document.getElementById('photoDrop').style.display='none';
+    document.getElementById('photoCommentWrap').style.display='block';
     document.getElementById('btnPhoto').style.display='block';
   };
   reader.readAsDataURL(file);
@@ -722,7 +755,7 @@ async function analyzePhoto(){
       headers:{'Content-Type':'application/json','x-api-key':getKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
       body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,
         system:`Tu esi uztura speciālists. Alerģija: olas, govs piens, kviešu milti. Mērķi: ${T.kcal} kcal, ${T.prot}g proteīns. Atbildi TIKAI ar JSON bez markdown: {"name":"ēdiena nosaukums","kcal":skaitlis,"prot":skaitlis,"carb":skaitlis,"fat":skaitlis,"note":"komentārs latviski"}`,
-        messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:photoB64Type,data:photoB64}},{type:'text',text:'Analizē šī attēlā redzamo ēdienu un aprēķini uzturvērtības.'}]}]
+        messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:photoB64Type,data:photoB64}},{type:'text',text:'Analizē šī attēlā redzamo ēdienu un aprēķini uzturvērtības.'+(document.getElementById('photoComment').value.trim()?(' Papildu info: '+document.getElementById('photoComment').value.trim()):'') }]}]
       })
     });
     if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e?.error?.message||'HTTP '+r.status);}
@@ -730,7 +763,7 @@ async function analyzePhoto(){
     const text=data.content.map(c=>c.text||'').join('');
     const p=JSON.parse(text.replace(/```json|```/g,'').trim());
     const imgSrc=document.getElementById('photoPreviewImg').src;
-    res.innerHTML=`<div class="ai-card"><div class="ai-rn">${p.name}</div><div class="ai-chips"><span class="aic k">${p.kcal} kcal</span><span class="aic p">P: ${p.prot}g</span><span class="aic c">C: ${p.carb}g</span><span class="aic f">T: ${p.fat}g</span></div><div class="ai-note">${p.note}</div><button class="btn-add-ai" onclick='addFromAI(${JSON.stringify({...p,img:imgSrc}).replace(/'/g,"&#39;")})'>+ Pievienot šodienas sarakstam</button></div>`;
+    res.innerHTML=`<div class="ai-card"><div class="ai-rn">${p.name}</div><div class="ai-chips"><span class="aic k">${p.kcal} kcal</span><span class="aic p">P: ${p.prot}g</span><span class="aic c">C: ${p.carb}g</span><span class="aic f">T: ${p.fat}g</span></div><div class="ai-note">${p.note}</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn-add-ai" onclick='addFromAI(${JSON.stringify({...p,img:imgSrc}).replace(/'/g,"&#39;")})'>+ Pievienot tūlīt</button><button class="btn-add-ai" style="background:var(--blue-bg);border-color:var(--accent);color:var(--accent)" onclick='openAiEdit(${JSON.stringify({...p,img:imgSrc}).replace(/'/g,"&#39;")})'>✏ Rediģēt un pievienot</button></div></div>`;
   }catch(e){res.innerHTML=`<div class="ai-card"><div style="color:var(--red);font-size:12.5px;line-height:1.6"><strong>Kļūda:</strong> ${e.message}<br>Pārbaudi API atslēgu un konta kredītu (console.anthropic.com → Billing)</div></div>`;}
   finally{btn.disabled=false;}
 }
@@ -740,6 +773,8 @@ function resetPhoto(){
   document.getElementById('photoPreviewImg').style.display='none';
   document.getElementById('photoPreviewImg').src='';
   document.getElementById('photoDrop').style.display='block';
+  document.getElementById('photoCommentWrap').style.display='none';
+  document.getElementById('photoComment').value='';
   document.getElementById('btnPhoto').style.display='none';
   document.getElementById('photoFile').value='';
   document.getElementById('aiPhotoRes').className='ai-res';
@@ -755,7 +790,7 @@ async function analyzeText(){
   if(!text)return;
   try{
     const p=JSON.parse(text.replace(/```json|```/g,'').trim());
-    document.getElementById('aiTxtRes').innerHTML=`<div class="ai-card"><div class="ai-rn">${p.name}</div><div class="ai-chips"><span class="aic k">${p.kcal} kcal</span><span class="aic p">P: ${p.prot}g</span><span class="aic c">C: ${p.carb}g</span><span class="aic f">T: ${p.fat}g</span></div><div class="ai-note">${p.note}</div><button class="btn-add-ai" onclick='addFromAI(${JSON.stringify(p).replace(/'/g,"&#39;")})'>+ Pievienot šodienas sarakstam</button></div>`;
+    document.getElementById('aiTxtRes').innerHTML=`<div class="ai-card"><div class="ai-rn">${p.name}</div><div class="ai-chips"><span class="aic k">${p.kcal} kcal</span><span class="aic p">P: ${p.prot}g</span><span class="aic c">C: ${p.carb}g</span><span class="aic f">T: ${p.fat}g</span></div><div class="ai-note">${p.note}</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn-add-ai" onclick='addFromAI(${JSON.stringify(p).replace(/'/g,"&#39;")})'>+ Pievienot tūlīt</button><button class="btn-add-ai" style="background:var(--blue-bg);border-color:var(--accent);color:var(--accent)" onclick='openAiEdit(${JSON.stringify(p).replace(/'/g,"&#39;")})'>✏ Rediģēt un pievienot</button></div></div>`;
   }catch{document.getElementById('aiTxtRes').innerHTML='<div style="color:var(--red);font-size:12.5px">Kļūda parsējot. Mēģini vēlreiz.</div>';}
 }
 
@@ -832,6 +867,41 @@ function clearAllData(){
   if(t)localStorage.setItem('nt_tgt',t);
   renderCards();renderMeals();renderQuick();
   closeSettings();alert('Visi ēdienreižu dati dzēsti.');
+}
+
+// ── AI EDIT MODAL ──
+function openAiEdit(p){
+  document.getElementById('aeNm').value=p.name||'';
+  document.getElementById('aeKcal').value=p.kcal||0;
+  document.getElementById('aeProt').value=p.prot||0;
+  document.getElementById('aeCarb').value=p.carb||0;
+  document.getElementById('aeFat').value=p.fat||0;
+  document.getElementById('aeImg').value=p.img||'';
+  // pre-select category based on current time
+  const h=new Date().getHours();
+  const cat=h<10?'Brokastis':h<12?'Uzkoda':h<15?'Pusdienas':h<17?'Pēcpusdiena':h<21?'Vakariņas':'Pirms gulēt';
+  const sel=document.getElementById('aeCat');
+  for(let i=0;i<sel.options.length;i++){if(sel.options[i].value===cat){sel.selectedIndex=i;break;}}
+  document.getElementById('aiEditOv').classList.add('open');
+}
+function closeAiEdit(){document.getElementById('aiEditOv').classList.remove('open');}
+function aiEditOvClick(e){if(e.target.id==='aiEditOv')closeAiEdit();}
+function confirmAiEdit(){
+  const meal={
+    name:document.getElementById('aeNm').value.trim()||'Nezināms ēdiens',
+    kcal:parseInt(document.getElementById('aeKcal').value)||0,
+    prot:parseInt(document.getElementById('aeProt').value)||0,
+    carb:parseInt(document.getElementById('aeCarb').value)||0,
+    fat:parseInt(document.getElementById('aeFat').value)||0,
+    img:document.getElementById('aeImg').value||null,
+    time:document.getElementById('aeCat').value
+  };
+  const meals=getMeals(todayKey());
+  meals.push(meal);
+  saveMeals(todayKey(),meals);
+  renderCards();renderMeals();renderQuick();
+  closeAiEdit();
+  goTab('today');
 }
 
 init();
