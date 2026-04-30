@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Ņammīte Edmis</title>
+<title>NutriTrack</title>
 <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -186,7 +186,7 @@ body{font-family:var(--font);color:var(--text);-webkit-font-smoothing:antialiase
 .dd-meal-time{font-size:10px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
 .dd-meal-k{font-size:13px;font-weight:800;color:var(--text);white-space:nowrap;margin-left:auto}
 .month-sum{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-@media(min-width:460px){.month-sum{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:460px){.month-sum{grid-template-columns:repeat(4,1fr)}}
 .ms-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px;box-shadow:var(--shadow-sm)}
 .ms-lbl{font-size:9.5px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px}
 .ms-val{font-size:19px;font-weight:800;letter-spacing:-0.3px}
@@ -242,7 +242,18 @@ body{font-family:var(--font);color:var(--text);-webkit-font-smoothing:antialiase
 .btn-danger{width:100%;padding:9px;background:none;border:1.5px solid rgba(192,57,43,0.25);border-radius:var(--r);color:var(--red);font-family:var(--font);font-size:12px;cursor:pointer;margin-top:8px;transition:all .15s}
 .btn-danger:hover{background:rgba(192,57,43,0.05);border-color:var(--red)}
 
-/* bottom nav */
+/* correction chat */
+.corr-wrap{margin-top:10px;border-top:1px solid var(--border);padding-top:10px}
+.corr-history{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+.corr-msg{font-size:12.5px;line-height:1.55;padding:7px 10px;border-radius:8px}
+.corr-msg.user{background:var(--blue-bg);color:var(--blue);align-self:flex-end;max-width:85%}
+.corr-msg.ai{background:var(--bg3);color:var(--text2);align-self:flex-start;max-width:95%}
+.corr-row{display:flex;gap:6px}
+.corr-row input{flex:1;padding:8px 11px;font-size:13px;font-family:var(--font);background:var(--bg3);border:1.5px solid var(--border2);border-radius:var(--r);color:var(--text);outline:none;transition:border .2s;min-width:0}
+.corr-row input:focus{border-color:var(--accent);background:#fff}
+.corr-row input::placeholder{color:var(--text3)}
+.btn-corr{padding:8px 13px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:var(--font);font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0}
+.btn-corr:hover{background:var(--accent2)}.btn-corr:disabled{opacity:.4;cursor:not-allowed}
 .bnav{position:fixed;bottom:0;left:0;right:0;background:rgba(232,240,245,0.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;justify-content:center;z-index:40}
 .bnav-inner{display:flex;max-width:640px;width:100%}
 .nb{flex:1;padding:11px 8px 16px;background:none;border:none;cursor:pointer;font-family:var(--font);font-size:9.5px;font-weight:700;color:var(--text3);display:flex;flex-direction:column;align-items:center;gap:4px;transition:color .15s;text-transform:uppercase;letter-spacing:.4px}
@@ -259,8 +270,8 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 <!-- SETUP -->
 <div id="setup">
   <div class="setup-wrap">
-    <div class="setup-logo">ŅE</div>
-    <h1>Ņammīte Edmis</h1>
+    <div class="setup-logo">NT</div>
+    <h1>NutriTrack</h1>
     <p>Personīgais AI uztura trackeris.<br>Ievadi Anthropic API atslēgu, lai sāktu.</p>
     <div class="setup-steps">
       <div class="ss"><div class="ss-n">1</div><p>Atver <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> un reģistrējies</p></div>
@@ -277,7 +288,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 <!-- APP -->
 <div id="app">
   <div class="app-bar">
-    <div class="app-logo"><span class="logo-pip"></span>Ņammīte Edmis</div>
+    <div class="app-logo"><span class="logo-pip"></span>NutriTrack</div>
     <div style="display:flex;align-items:center;gap:12px">
       <span class="hdate" id="hdate"></span>
       <button class="icon-btn" onclick="openSettings()" title="Iestatījumi">⚙</button>
@@ -288,7 +299,6 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <div class="tabs">
       <button class="tab active" onclick="goTab('today')">Šodiena</button>
       <button class="tab" onclick="goTab('month')">Mēnesis</button>
-      <button class="tab" onclick="goTab('add')">Pievienot</button>
       <button class="tab" onclick="goTab('ai')">AI palīgs</button>
     </div>
   </div>
@@ -296,6 +306,32 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   <!-- TODAY -->
   <div id="tab-today" class="sec active">
     <div class="mc-grid" id="mcCards"></div>
+    <div class="panel">
+      <div class="panel-hd"><span class="panel-icon">+</span>Pievienot ēdienreizi</div>
+      <div class="frow">
+        <div class="fg fg-name">
+          <label>Produkts / ēdiens</label>
+          <input type="text" id="mName" placeholder="Piemēram: vistas krūtiņa 180g" onkeydown="if(event.key==='Enter')addMeal()">
+        </div>
+        <div class="fg fg-time">
+          <label>Ēdienreize</label>
+          <select id="mTime">
+            <option>Brokastis</option><option>Uzkoda</option>
+            <option selected>Pusdienas</option><option>Pēcpusdiena</option>
+            <option>Vakariņas</option><option>Pirms gulēt</option>
+          </select>
+        </div>
+      </div>
+      <div class="fgrid">
+        <div class="fg"><label>Kcal</label><input type="number" id="mKcal" placeholder="0" min="0"></div>
+        <div class="fg"><label>Proteīns g</label><input type="number" id="mProt" placeholder="0" min="0"></div>
+        <div class="fg"><label>Ogļhidrāti g</label><input type="number" id="mCarb" placeholder="0" min="0"></div>
+        <div class="fg"><label>Tauki g</label><input type="number" id="mFat" placeholder="0" min="0"></div>
+      </div>
+      <button class="btn-add" onclick="addMeal()" style="margin-bottom:14px">Pievienot ēdienreizi</button>
+      <div class="ql">Bieži lietotie (no vēstures)</div>
+      <div class="qrow" id="qrow"></div>
+    </div>
     <div class="list-hd">
       <div class="list-lbl">Šodienas ēdienreizes</div>
       <button class="clr-btn" onclick="clearToday()">Dzēst visu</button>
@@ -324,36 +360,6 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     </div>
     <div class="list-lbl" style="margin-bottom:10px">Mēneša kopsavilkums</div>
     <div class="month-sum" id="monthSum"></div>
-  </div>
-
-  <!-- ADD -->
-  <div id="tab-add" class="sec">
-    <div class="panel">
-      <div class="panel-hd"><span class="panel-icon">+</span>Pievienot ēdienreizi</div>
-      <div class="frow">
-        <div class="fg fg-name">
-          <label>Produkts / ēdiens</label>
-          <input type="text" id="mName" placeholder="Piemēram: vistas krūtiņa 180g" onkeydown="if(event.key==='Enter')addMealAndSwitch()">
-        </div>
-        <div class="fg fg-time">
-          <label>Ēdienreize</label>
-          <select id="mTime">
-            <option>Brokastis</option><option>Uzkoda</option>
-            <option selected>Pusdienas</option><option>Pēcpusdiena</option>
-            <option>Vakariņas</option><option>Pirms gulēt</option>
-          </select>
-        </div>
-      </div>
-      <div class="fgrid">
-        <div class="fg"><label>Kcal</label><input type="number" id="mKcal" placeholder="0" min="0"></div>
-        <div class="fg"><label>Proteīns g</label><input type="number" id="mProt" placeholder="0" min="0"></div>
-        <div class="fg"><label>Ogļhidrāti g</label><input type="number" id="mCarb" placeholder="0" min="0"></div>
-        <div class="fg"><label>Tauki g</label><input type="number" id="mFat" placeholder="0" min="0"></div>
-      </div>
-      <button class="btn-add" onclick="addMealAndSwitch()" style="margin-bottom:14px;width:100%">Pievienot ēdienreizi</button>
-      <div class="ql">Bieži lietotie (no vēstures)</div>
-      <div class="qrow" id="qrow"></div>
-    </div>
   </div>
 
   <!-- AI -->
@@ -443,7 +449,6 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   <div class="bnav-inner">
     <button class="nb active" id="nb-today" onclick="goTab('today')"><span class="nb-icon">◎</span>Šodiena</button>
     <button class="nb" id="nb-month" onclick="goTab('month')"><span class="nb-icon">▦</span>Mēnesis</button>
-    <button class="nb" id="nb-add" onclick="goTab('add')"><span class="nb-icon">＋</span>Pievienot</button>
     <button class="nb" id="nb-ai" onclick="goTab('ai')"><span class="nb-icon">✦</span>AI palīgs</button>
   </div>
 </div>
@@ -607,11 +612,6 @@ function quickFill(name,kcal,prot,carb,fat){
   document.getElementById('mFat').value=fat;
 }
 
-function addMealAndSwitch(extra){
-  addMeal(extra);
-  if(!extra)goTab('today');
-}
-
 function addMeal(extra){
   const name=(extra&&extra.name)||document.getElementById('mName').value.trim();
   if(!name){document.getElementById('mName').focus();return;}
@@ -665,14 +665,11 @@ function renderMonth(){
   }
   document.getElementById('calGrid').innerHTML=html;
   const avg=v=>activeDays?Math.round(v/activeDays):0;
-  const pctAvg=avg(totK)?Math.round(avg(totK)/T.kcal*100):0;
   document.getElementById('monthSum').innerHTML=`
-    <div class="ms-card"><div class="ms-lbl">Kopā kcal</div><div class="ms-val" style="color:var(--green)">${totK}</div><div class="ms-sub">${activeDays} dienas ar ierakstiem</div></div>
-    <div class="ms-card"><div class="ms-lbl">Vid. kcal / dienā</div><div class="ms-val">${avg(totK)}</div><div class="ms-sub">Mērķis: ${T.kcal} · ${pctAvg}%</div></div>
-    <div class="ms-card"><div class="ms-lbl">Vid. proteīns</div><div class="ms-val" style="color:var(--blue)">${avg(totP)}g</div><div class="ms-sub">Mērķis: ${T.prot}g · ${activeDays?Math.round(avg(totP)/T.prot*100):0}%</div></div>
-    <div class="ms-card"><div class="ms-lbl">Vid. ogļhidrāti</div><div class="ms-val" style="color:var(--amber)">${avg(totC)}g</div><div class="ms-sub">Mērķis: ${T.carb}g · ${activeDays?Math.round(avg(totC)/T.carb*100):0}%</div></div>
-    <div class="ms-card"><div class="ms-lbl">Vid. tauki</div><div class="ms-val" style="color:var(--pink)">${avg(totF)}g</div><div class="ms-sub">Mērķis: ${T.fat}g · ${activeDays?Math.round(avg(totF)/T.fat*100):0}%</div></div>
-    <div class="ms-card"><div class="ms-lbl">Kaloriju mērķis</div><div class="ms-val" style="color:var(--accent)">${pctAvg}%</div><div class="ms-sub">vidēji no mērķa</div></div>`;
+    <div class="ms-card"><div class="ms-lbl">Kopā kcal</div><div class="ms-val" style="color:var(--green)">${totK}</div><div class="ms-sub">${activeDays} dienas</div></div>
+    <div class="ms-card"><div class="ms-lbl">Vidēji kcal</div><div class="ms-val">${avg(totK)}</div><div class="ms-sub">Mērķis: ${T.kcal}</div></div>
+    <div class="ms-card"><div class="ms-lbl">Vidēji proteīns</div><div class="ms-val" style="color:var(--blue)">${avg(totP)}g</div><div class="ms-sub">Mērķis: ${T.prot}g</div></div>
+    <div class="ms-card"><div class="ms-lbl">Mērķa izpilde</div><div class="ms-val" style="color:var(--accent)">${avg(totK)?Math.round(avg(totK)/T.kcal*100):0}%</div><div class="ms-sub">kaloriju mērķis</div></div>`;
 }
 
 function openDay(key,d,evt){
@@ -744,7 +741,7 @@ async function analyzePhoto(){
     const text=data.content.map(c=>c.text||'').join('');
     const p=JSON.parse(text.replace(/```json|```/g,'').trim());
     const imgSrc=document.getElementById('photoPreviewImg').src;
-    res.innerHTML=`<div class="ai-card"><div class="ai-rn">${p.name}</div><div class="ai-chips"><span class="aic k">${p.kcal} kcal</span><span class="aic p">P: ${p.prot}g</span><span class="aic c">C: ${p.carb}g</span><span class="aic f">T: ${p.fat}g</span></div><div class="ai-note">${p.note}</div><button class="btn-add-ai" onclick='addFromAI(${JSON.stringify({...p,img:imgSrc}).replace(/'/g,"&#39;")})'>+ Pievienot šodienas sarakstam</button></div>`;
+    renderAiResult('aiPhotoRes', p, imgSrc, photoB64, photoB64Type);
   }catch(e){res.innerHTML=`<div class="ai-card"><div style="color:var(--red);font-size:12.5px;line-height:1.6"><strong>Kļūda:</strong> ${e.message}<br>Pārbaudi API atslēgu un konta kredītu (console.anthropic.com → Billing)</div></div>`;}
   finally{btn.disabled=false;}
 }
@@ -769,8 +766,115 @@ async function analyzeText(){
   if(!text)return;
   try{
     const p=JSON.parse(text.replace(/```json|```/g,'').trim());
-    document.getElementById('aiTxtRes').innerHTML=`<div class="ai-card"><div class="ai-rn">${p.name}</div><div class="ai-chips"><span class="aic k">${p.kcal} kcal</span><span class="aic p">P: ${p.prot}g</span><span class="aic c">C: ${p.carb}g</span><span class="aic f">T: ${p.fat}g</span></div><div class="ai-note">${p.note}</div><button class="btn-add-ai" onclick='addFromAI(${JSON.stringify(p).replace(/'/g,"&#39;")})'>+ Pievienot šodienas sarakstam</button></div>`;
+    renderAiResult('aiTxtRes', p, null, null, null);
   }catch{document.getElementById('aiTxtRes').innerHTML='<div style="color:var(--red);font-size:12.5px">Kļūda parsējot. Mēģini vēlreiz.</div>';}
+}
+
+// ── AI RESULT RENDERING + CORRECTION CHAT ──
+function renderAiResult(resId, p, imgSrc, b64, b64type, history){
+  history = history || [];
+  const safeP = JSON.stringify({...p, img: imgSrc||null}).replace(/'/g,"&#39;");
+  const el = document.getElementById(resId);
+  el.className = 'ai-res show';
+
+  // build correction history HTML
+  const histHTML = history.map(h=>
+    `<div class="corr-msg ${h.role}">${h.role==='user'?'✏ '+h.text:h.text}</div>`
+  ).join('');
+
+  el.innerHTML = `<div class="ai-card">
+    <div class="ai-rn">${p.name}</div>
+    <div class="ai-chips">
+      <span class="aic k">${p.kcal} kcal</span>
+      <span class="aic p">P: ${p.prot}g</span>
+      <span class="aic c">C: ${p.carb}g</span>
+      <span class="aic f">T: ${p.fat}g</span>
+    </div>
+    <div class="ai-note">${p.note}</div>
+    <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:0">
+      <button class="btn-add-ai" onclick='addFromAI(${safeP})'>+ Pievienot sarakstam</button>
+    </div>
+    <div class="corr-wrap">
+      <div class="corr-history" id="corrHist_${resId}">${histHTML}</div>
+      <div class="corr-row">
+        <input type="text" id="corrInp_${resId}" placeholder="Precizē kļūdu — piemēram: porcija bija 300g, nevis 200g..." onkeydown="if(event.key==='Enter')sendCorrection('${resId}')">
+        <button class="btn-corr" id="corrBtn_${resId}" onclick="sendCorrection('${resId}')">Precizēt ↗</button>
+      </div>
+    </div>
+  </div>`;
+
+  // store state on element for re-renders
+  el._aiState = {p, imgSrc, b64, b64type, history};
+}
+
+async function sendCorrection(resId){
+  const el = document.getElementById(resId);
+  const state = el._aiState;
+  if(!state) return;
+  const inp = document.getElementById('corrInp_'+resId);
+  const btn = document.getElementById('corrBtn_'+resId);
+  const correction = inp.value.trim();
+  if(!correction) return;
+
+  inp.value = '';
+  btn.disabled = true;
+
+  // add user message to history
+  state.history.push({role:'user', text: correction});
+  // show loading in history
+  const hist = document.getElementById('corrHist_'+resId);
+  hist.innerHTML = state.history.map(h=>
+    `<div class="corr-msg ${h.role}">${h.role==='user'?'✏ '+h.text:h.text}</div>`
+  ).join('') + '<div class="corr-msg ai"><div class="spin" style="display:inline-block"></div> Pārrēķina...</div>';
+
+  const T = getTarget();
+  const sys = `Tu esi uztura speciālists. Lietotājs labo iepriekšējo analīzi. Atbildi TIKAI ar JSON bez markdown: {"name":"nosaukums","kcal":skaitlis,"prot":skaitlis,"carb":skaitlis,"fat":skaitlis,"note":"komentārs latviski par korekciju"}`;
+
+  // build messages array — include image if available
+  let messages;
+  if(state.b64){
+    messages = [
+      {role:'user', content:[
+        {type:'image', source:{type:'base64', media_type:state.b64type, data:state.b64}},
+        {type:'text', text:`Sākotnējā analīze: ${JSON.stringify(state.p)}`}
+      ]},
+      {role:'assistant', content: JSON.stringify(state.p)},
+      ...state.history.slice(0,-1).flatMap(h=>h.role==='user'
+        ? [{role:'user',content:h.text}]
+        : [{role:'assistant',content:h.text}]
+      ),
+      {role:'user', content: correction}
+    ];
+  } else {
+    messages = [
+      {role:'user', content:`Sākotnējā analīze: ${JSON.stringify(state.p)}`},
+      {role:'assistant', content: JSON.stringify(state.p)},
+      ...state.history.slice(0,-1).flatMap(h=>h.role==='user'
+        ? [{role:'user',content:h.text}]
+        : [{role:'assistant',content:h.text}]
+      ),
+      {role:'user', content: correction}
+    ];
+  }
+
+  try{
+    const r = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':getKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body: JSON.stringify({model:'claude-haiku-4-5-20251001', max_tokens:800, system:sys, messages})
+    });
+    if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e?.error?.message||'HTTP '+r.status);}
+    const data = await r.json();
+    const raw = data.content.map(c=>c.text||'').join('');
+    const newP = JSON.parse(raw.replace(/```json|```/g,'').trim());
+    state.history.push({role:'ai', text:`Atjaunināts: ${newP.kcal} kcal · P:${newP.prot}g · C:${newP.carb}g · T:${newP.fat}g`});
+    // re-render with updated values
+    renderAiResult(resId, newP, state.imgSrc, state.b64, state.b64type, state.history);
+  }catch(e){
+    state.history.push({role:'ai', text:`Kļūda: ${e.message}`});
+    renderAiResult(resId, state.p, state.imgSrc, state.b64, state.b64type, state.history);
+  }
+  btn.disabled = false;
 }
 
 function addFromAI(p){addMeal({name:p.name,kcal:p.kcal,prot:p.prot,carb:p.carb,fat:p.fat,img:p.img||null});goTab('today');}
@@ -806,14 +910,13 @@ async function aiCall(sys,usr,btnId,resId){
 
 // ── NAV ──
 function goTab(tab){
-  const tabs=['today','month','add','ai'];
+  const tabs=['today','month','ai'];
   document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',tabs[i]===tab));
   document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.nb').forEach((b,i)=>b.classList.toggle('active',tabs[i]===tab));
   document.getElementById('tab-'+tab).classList.add('active');
   if(tab==='month')renderMonth();
   if(tab==='ai')resetPhoto();
-  if(tab==='add')renderQuick();
 }
 
 // ── SETTINGS ──
