@@ -145,7 +145,17 @@ body{font-family:var(--font);color:var(--text);-webkit-font-smoothing:antialiase
 .photo-drop-icon{font-size:22px;margin-bottom:5px}
 .photo-drop p{font-size:12.5px;color:var(--text2)}
 .photo-drop small{font-size:11px;color:var(--text3)}
-#photoPreviewImg{width:100%;max-height:180px;object-fit:cover;border-radius:var(--r);display:none;margin-bottom:9px}
+/* multi-photo grid */
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px}
+.photo-thumb-wrap{position:relative;border-radius:var(--r);overflow:hidden;aspect-ratio:1;background:var(--bg3)}
+.photo-thumb-wrap img{width:100%;height:100%;object-fit:cover;display:block}
+.photo-thumb-remove{position:absolute;top:4px;right:4px;width:20px;height:20px;border-radius:50%;background:rgba(13,31,45,0.65);color:#fff;border:none;cursor:pointer;font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.photo-thumb-remove:hover{background:var(--red)}
+.photo-add-more{border:1.5px dashed var(--border2);border-radius:var(--r);aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;position:relative;background:var(--bg3)}
+.photo-add-more:hover{border-color:var(--accent);background:var(--blue-bg)}
+.photo-add-more input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.photo-add-more span{font-size:20px;line-height:1;margin-bottom:3px;color:var(--text3)}
+.photo-add-more p{font-size:10.5px;color:var(--text3)}
 
 /* ── MONTH TAB ── */
 .month-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
@@ -366,12 +376,14 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   <div id="tab-ai" class="sec">
     <div class="ai-panel">
       <div class="ai-hd"><span class="ai-badge">AI</span><h3>Foto analīze</h3></div>
-      <img id="photoPreviewImg" alt="Ēdiena foto">
+      <!-- multi-photo grid — rendered by JS -->
+      <div class="photo-grid" id="photoGrid" style="display:none"></div>
+      <!-- initial drop zone -->
       <div class="photo-drop" id="photoDrop">
-        <input type="file" accept="image/*" id="photoFile" onchange="onPhotoSelect(event)">
+        <input type="file" accept="image/*" multiple id="photoFile" onchange="onPhotosSelect(event)">
         <div class="photo-drop-icon">📷</div>
-        <p>Nofotografē šķīvi vai ievelc attēlu šeit</p>
-        <small>JPG, PNG, HEIC · maks. 5MB</small>
+        <p>Pievienot vienu vai vairākas bildes</p>
+        <small>JPG, PNG, HEIC · maks. 5MB katrai</small>
       </div>
       <button class="btn-an" id="btnPhoto" onclick="analyzePhoto()" style="width:100%;display:none">Analizēt foto →</button>
       <div class="ai-res" id="aiPhotoRes"></div>
@@ -459,7 +471,93 @@ const DOW=['P','O','T','C','Pk','S','Sv'];
 const MONTHS=['Janvāris','Februāris','Marts','Aprīlis','Maijs','Jūnijs','Jūlijs','Augusts','Septembris','Oktobris','Novembris','Decembris'];
 
 let viewMonth=new Date();viewMonth.setDate(1);
-let photoB64=null,photoB64Type=null;
+let photos=[]; // array of {b64, type, src}
+
+function onPhotosSelect(e){
+  const files=Array.from(e.target.files);
+  files.forEach(file=>{
+    if(file.size>5*1024*1024){alert(`${file.name} pārāk liels (maks. 5MB)`);return;}
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      photos.push({b64:ev.target.result.split(',')[1], type:file.type, src:ev.target.result});
+      renderPhotoGrid();
+    };
+    reader.readAsDataURL(file);
+  });
+  e.target.value=''; // reset so same file can be re-added
+}
+
+function renderPhotoGrid(){
+  const grid=document.getElementById('photoGrid');
+  const drop=document.getElementById('photoDrop');
+  const btn=document.getElementById('btnPhoto');
+  if(!photos.length){
+    grid.style.display='none';
+    drop.style.display='block';
+    btn.style.display='none';
+    return;
+  }
+  grid.style.display='grid';
+  drop.style.display='none';
+  btn.style.display='block';
+  // build thumbs + add-more cell
+  grid.innerHTML = photos.map((p,i)=>`
+    <div class="photo-thumb-wrap">
+      <img src="${p.src}" alt="Bilde ${i+1}">
+      <button class="photo-thumb-remove" onclick="removePhoto(${i})" title="Noņemt">×</button>
+    </div>`).join('') +
+    `<div class="photo-add-more">
+      <input type="file" accept="image/*" multiple onchange="onPhotosSelect(event)">
+      <span>＋</span><p>Pievienot</p>
+    </div>`;
+}
+
+function removePhoto(i){
+  photos.splice(i,1);
+  renderPhotoGrid();
+}
+
+async function analyzePhoto(){
+  if(!photos.length)return;
+  const btn=document.getElementById('btnPhoto');const res=document.getElementById('aiPhotoRes');
+  btn.disabled=true;res.className='ai-res show';
+  res.innerHTML='<div class="ld-row"><div class="spin"></div>Analizē foto ar AI...</div>';
+  const T=getTarget();
+  try{
+    // build content array — one image block per photo
+    const content=photos.flatMap((p,i)=>[
+      {type:'image',source:{type:'base64',media_type:p.type,data:p.b64}},
+      ...(i<photos.length-1?[]:[]) // spacer only if needed
+    ]);
+    content.push({type:'text',text:`Analizē visas ${photos.length} bildē redzamo ēdienu kopā kā vienu ēdienreizi un aprēķini kopējās uzturvērtības.`});
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':getKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,
+        system:`Tu esi uztura speciālists. Alerģija: olas, govs piens, kviešu milti. Mērķi: ${T.kcal} kcal, ${T.prot}g proteīns. Atbildi TIKAI ar JSON bez markdown: {"name":"ēdiena nosaukums","kcal":skaitlis,"prot":skaitlis,"carb":skaitlis,"fat":skaitlis,"note":"komentārs latviski"}`,
+        messages:[{role:'user',content}]
+      })
+    });
+    if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e?.error?.message||'HTTP '+r.status);}
+    const data=await r.json();
+    const text=data.content.map(c=>c.text||'').join('');
+    const p=JSON.parse(text.replace(/```json|```/g,'').trim());
+    // use first photo as thumbnail in meal list
+    renderAiResult('aiPhotoRes', p, photos[0].src, photos[0].b64, photos[0].type);
+  }catch(e){res.innerHTML=`<div class="ai-card"><div style="color:var(--red);font-size:12.5px;line-height:1.6"><strong>Kļūda:</strong> ${e.message}<br>Pārbaudi API atslēgu un konta kredītu (console.anthropic.com → Billing)</div></div>`;}
+  finally{btn.disabled=false;}
+}
+
+function resetPhoto(){
+  photos=[];
+  document.getElementById('photoGrid').style.display='none';
+  document.getElementById('photoGrid').innerHTML='';
+  document.getElementById('photoDrop').style.display='block';
+  document.getElementById('btnPhoto').style.display='none';
+  document.getElementById('photoFile').value='';
+  document.getElementById('aiPhotoRes').className='ai-res';
+  document.getElementById('aiPhotoRes').innerHTML='';
+}
 
 // ── STORAGE ──
 const getKey=()=>localStorage.getItem('nt_key')||'';
