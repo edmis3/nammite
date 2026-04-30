@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>NutriTrack</title>
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0c;--bg2:#111114;--bg3:#18181c;--bg4:#222226;--bg5:#2a2a2f;
+  --text:#f0ede8;--text2:#7a7a82;--text3:#3f3f46;
+  --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.11);--border3:rgba(255,255,255,0.18);
+  --accent:#b8f94a;--accent2:#8bc435;--accent-bg:rgba(184,249,74,0.07);
+  --green:#b8f94a;--blue:#60b4f6;--amber:#f6a832;--pink:#f06e9a;--red:#f05252;
+  --r:10px;--rl:16px;
+  --font:'Epilogue',sans-serif;
+}
+html,body{height:100%;background:var(--bg)}
+body{font-family:var(--font);color:var(--text);-webkit-font-smoothing:antialiased}
+
+/* ── SETUP ── */
+#setup{position:fixed;inset:0;background:var(--bg);z-index:100;display:flex;align-items:center;justify-content:center;padding:24px}
+.setup-wrap{max-width:400px;width:100%}
+.setup-logo{width:52px;height:52px;background:var(--accent);border-radius:14px;display:grid;place-items:center;margin:0 auto 20px;font-weight:900;font-size:20px;color:#0a0a0c;letter-spacing:-1px}
+.setup-wrap h1{font-size:26px;font-weight:900;text-align:center;letter-spacing:-0.5px;margin-bottom:6px}
+.setup-wrap>p{font-size:13px;color:var(--text2);text-align:center;line-height:1.6;margin-bottom:24px}
+.setup-steps{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--rl);padding:16px;margin-bottom:20px;display:flex;flex-direction:column;gap:12px}
+.ss{display:flex;gap:10px;align-items:flex-start}
+.ss-n{width:20px;height:20px;border-radius:50%;background:var(--accent-bg);border:1px solid var(--accent2);color:var(--accent);font-size:10px;font-weight:700;display:grid;place-items:center;flex-shrink:0;margin-top:2px}
+.ss p{font-size:12.5px;color:var(--text2);line-height:1.55}
+.ss a{color:var(--accent);text-decoration:none}.ss a:hover{text-decoration:underline}
+.ss code{font-size:11px;background:var(--bg3);padding:2px 5px;border-radius:4px;color:var(--accent)}
+.inp{width:100%;padding:13px 14px;font-size:14px;font-family:var(--font);background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);outline:none;transition:border .2s;margin-bottom:10px}
+.inp:focus{border-color:var(--accent)}.inp::placeholder{color:var(--text3)}
+.btn-p{width:100%;padding:14px;background:var(--accent);color:#0a0a0c;border:none;border-radius:var(--r);font-family:var(--font);font-size:14px;font-weight:800;cursor:pointer;letter-spacing:0.2px;transition:all .2s}
+.btn-p:hover{background:#c8ff5a;transform:translateY(-1px)}
+.setup-note{font-size:11px;color:var(--text3);text-align:center;margin-top:10px;line-height:1.5}
+
+/* ── APP ── */
+#app{display:none;max-width:640px;margin:0 auto;min-height:100vh;padding-bottom:76px}
+.app-bar{padding:18px 18px 0;display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.app-logo{font-weight:900;font-size:17px;letter-spacing:-0.3px;display:flex;align-items:center;gap:7px}
+.logo-pip{width:7px;height:7px;background:var(--accent);border-radius:50%}
+.hdate{font-size:11.5px;color:var(--text2)}
+.icon-btn{background:none;border:none;color:var(--text2);cursor:pointer;font-size:17px;padding:4px;line-height:1;transition:color .15s}
+.icon-btn:hover{color:var(--accent)}
+
+/* tabs */
+.tabs-bar{padding:0 18px;border-bottom:1px solid var(--border);margin-bottom:18px}
+.tabs{display:flex}
+.tab{padding:11px 14px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:none;color:var(--text2);border-bottom:2px solid transparent;margin-bottom:-1px;font-family:var(--font);letter-spacing:0.1px;transition:all .15s}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+.sec{display:none;padding:0 18px}.sec.active{display:block}
+
+/* macro cards */
+.mc-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-bottom:18px}
+@media(min-width:460px){.mc-grid{grid-template-columns:repeat(4,1fr)}}
+.mc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:14px 12px;position:relative;overflow:hidden}
+.mc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.mc.k::before{background:var(--green)}.mc.p::before{background:var(--blue)}
+.mc.c::before{background:var(--amber)}.mc.f::before{background:var(--pink)}
+.mc-lbl{font-size:10px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.7px;margin-bottom:7px}
+.mc-val{font-size:24px;font-weight:800;letter-spacing:-0.5px;line-height:1}
+.mc.k .mc-val{color:var(--green)}.mc.p .mc-val{color:var(--blue)}
+.mc.c .mc-val{color:var(--amber)}.mc.f .mc-val{color:var(--pink)}
+.mc-sub{font-size:10.5px;color:var(--text3);margin-top:4px}
+.mc-bar{height:2px;background:var(--bg5);border-radius:2px;margin-top:9px;overflow:hidden}
+.mc-fill{height:100%;border-radius:2px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+
+/* add panel */
+.panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:18px;margin-bottom:18px}
+.panel-hd{font-size:14px;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:8px;letter-spacing:-0.2px}
+.panel-icon{width:22px;height:22px;background:var(--accent-bg);border:1px solid var(--accent2);border-radius:6px;display:grid;place-items:center;font-size:13px;color:var(--accent);font-weight:800;flex-shrink:0}
+.frow{display:flex;gap:8px;margin-bottom:9px;align-items:flex-end}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:13px}
+@media(min-width:460px){.fgrid{grid-template-columns:repeat(4,1fr)}}
+.fg{display:flex;flex-direction:column;gap:4px}
+.fg label{font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px}
+.fg input,.fg select{padding:9px 11px;font-size:14px;font-family:var(--font);background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);outline:none;transition:border .2s;-webkit-appearance:none}
+.fg input:focus,.fg select:focus{border-color:var(--accent)}
+.fg input::placeholder{color:var(--text3)}
+.btn-add{padding:10px 18px;background:var(--accent);color:#0a0a0c;border:none;border-radius:var(--r);font-family:var(--font);font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0}
+.btn-add:hover{background:#c8ff5a}
+
+/* photo upload */
+.photo-area{border:1.5px dashed var(--border2);border-radius:var(--r);padding:14px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:13px;position:relative}
+.photo-area:hover{border-color:var(--accent);background:var(--accent-bg)}
+.photo-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.photo-area p{font-size:12.5px;color:var(--text2);line-height:1.5}
+.photo-area span{font-size:20px;display:block;margin-bottom:4px}
+.photo-preview{width:100%;max-height:160px;object-fit:cover;border-radius:var(--r);margin-bottom:10px;display:none}
+.btn-analyze-photo{width:100%;padding:10px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);font-family:var(--font);font-size:13px;font-weight:700;color:var(--text);cursor:pointer;transition:all .2s;display:none}
+.btn-analyze-photo:hover{border-color:var(--accent);color:var(--accent)}
+.btn-analyze-photo:disabled{opacity:.4;cursor:not-allowed}
+
+/* quick chips */
+.ql{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:7px}
+.qrow{display:flex;gap:5px;flex-wrap:wrap}
+.qchip{padding:5px 11px;font-size:12px;font-weight:500;border:1px solid var(--border2);border-radius:20px;background:none;color:var(--text2);cursor:pointer;font-family:var(--font);transition:all .15s;white-space:nowrap}
+.qchip:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
+.qchip-empty{font-size:12px;color:var(--text3);font-style:italic}
+
+/* meals list */
+.list-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
+.list-lbl{font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.7px}
+.clr-btn{font-size:11.5px;color:var(--text3);background:none;border:none;cursor:pointer;font-family:var(--font);transition:color .15s}
+.clr-btn:hover{color:var(--red)}
+.meals{display:flex;flex-direction:column;gap:5px;margin-bottom:22px}
+.meal-item{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;display:flex;align-items:center;gap:11px;transition:border-color .2s;animation:si .22s ease}
+@keyframes si{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+.meal-item:hover{border-color:var(--border2)}
+.meal-badge{font-size:9.5px;font-weight:700;padding:3px 8px;border-radius:5px;background:var(--bg4);color:var(--text2);white-space:nowrap;letter-spacing:.4px;text-transform:uppercase;flex-shrink:0}
+.meal-thumb{width:36px;height:36px;border-radius:7px;object-fit:cover;flex-shrink:0}
+.meal-info{flex:1;min-width:0}
+.meal-name{font-size:13.5px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meal-macros{font-size:11px;color:var(--text2);margin-top:2px;display:flex;gap:7px}
+.mdot{width:4px;height:4px;border-radius:50%;display:inline-block;vertical-align:middle;margin-right:2px;flex-shrink:0}
+.meal-k{font-size:14px;font-weight:800;color:var(--text);flex-shrink:0;letter-spacing:-0.3px}
+.del-btn{background:none;border:none;cursor:pointer;color:var(--text3);font-size:17px;padding:3px;line-height:1;transition:color .15s}
+.del-btn:hover{color:var(--red)}
+.empty{text-align:center;padding:44px 20px;color:var(--text2)}
+.empty-i{font-size:36px;opacity:.25;margin-bottom:10px}
+
+/* ── MONTH TAB ── */
+.month-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.month-title{font-size:16px;font-weight:800;letter-spacing:-0.3px}
+.month-nav{display:flex;gap:6px}
+.mnav-btn{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text2);cursor:pointer;font-family:var(--font);font-size:13px;font-weight:700;padding:5px 12px;transition:all .15s}
+.mnav-btn:hover{border-color:var(--accent);color:var(--accent)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:20px}
+.cal-dow{font-size:10px;font-weight:700;color:var(--text3);text-align:center;padding:4px 0;text-transform:uppercase;letter-spacing:.5px}
+.cal-day{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:6px 4px;text-align:center;cursor:pointer;transition:all .15s;min-height:52px;display:flex;flex-direction:column;align-items:center;justify-content:space-between}
+.cal-day:hover{border-color:var(--border2)}
+.cal-day.today{border-color:var(--accent2)}
+.cal-day.selected{border-color:var(--accent);background:var(--accent-bg)}
+.cal-day.empty-day{background:transparent;border-color:transparent;cursor:default}
+.cal-day.has-data .cd-n{color:var(--text)}
+.cal-day .cd-n{font-size:11.5px;font-weight:700;color:var(--text3)}
+.cal-day.today .cd-n{color:var(--accent)}
+.cal-day .cd-k{font-size:9px;color:var(--text3);font-weight:500}
+.cal-day.has-data .cd-k{color:var(--green)}
+.cd-bar{width:100%;height:2px;background:var(--bg5);border-radius:2px;overflow:hidden;margin-top:2px}
+.cd-fill{height:100%;background:var(--accent);border-radius:2px}
+
+/* day detail */
+.day-detail{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--rl);padding:16px;margin-bottom:16px;display:none}
+.day-detail.open{display:block;animation:si .2s ease}
+.dd-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.dd-title{font-size:14px;font-weight:800;letter-spacing:-0.2px}
+.dd-close{background:none;border:none;cursor:pointer;color:var(--text2);font-size:18px;line-height:1;padding:2px}
+.dd-mc{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px}
+.dd-card{background:var(--bg3);border-radius:8px;padding:10px 8px;text-align:center}
+.dd-lbl{font-size:9.5px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px}
+.dd-val{font-size:16px;font-weight:800;letter-spacing:-0.3px}
+.dd-meals{display:flex;flex-direction:column;gap:5px}
+.dd-meal{background:var(--bg3);border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.dd-meal-name{font-size:13px;font-weight:600;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dd-meal-time{font-size:10px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+.dd-meal-k{font-size:13px;font-weight:800;color:var(--text);white-space:nowrap}
+.month-sum{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+@media(min-width:460px){.month-sum{grid-template-columns:repeat(4,1fr)}}
+.ms-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px}
+.ms-lbl{font-size:9.5px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px}
+.ms-val{font-size:19px;font-weight:800;letter-spacing:-0.3px}
+.ms-sub{font-size:10.5px;color:var(--text3);margin-top:2px}
+
+/* ── AI TAB ── */
+.ai-panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:18px;margin-bottom:12px}
+.ai-hd{display:flex;align-items:center;gap:9px;margin-bottom:13px}
+.ai-badge{font-size:9.5px;font-weight:800;padding:3px 8px;border-radius:20px;background:var(--accent-bg);color:var(--accent);border:1px solid var(--accent2);letter-spacing:.6px;text-transform:uppercase}
+.ai-hd h3{font-size:14px;font-weight:800;letter-spacing:-0.2px}
+.ai-row{display:flex;gap:7px}
+.ai-row input{flex:1;padding:10px 13px;font-size:13.5px;font-family:var(--font);background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);outline:none;transition:border .2s}
+.ai-row input:focus{border-color:var(--accent)}
+.ai-row input::placeholder{color:var(--text3)}
+.btn-an{padding:10px 16px;background:var(--accent);color:#0a0a0c;border:none;border-radius:var(--r);font-family:var(--font);font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0}
+.btn-an:hover{background:#c8ff5a}.btn-an:disabled{opacity:.4;cursor:not-allowed}
+.ai-res{margin-top:13px;display:none}.ai-res.show{display:block;animation:fi .25s ease}
+@keyframes fi{from{opacity:0}to{opacity:1}}
+.ai-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:13px}
+.ai-rn{font-size:15px;font-weight:800;margin-bottom:9px;letter-spacing:-0.2px}
+.ai-chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:9px}
+.aic{font-size:11.5px;padding:3px 9px;border-radius:5px;font-weight:700}
+.aic.k{background:rgba(184,249,74,.1);color:var(--green)}
+.aic.p{background:rgba(96,180,246,.1);color:var(--blue)}
+.aic.c{background:rgba(246,168,50,.1);color:var(--amber)}
+.aic.f{background:rgba(240,110,154,.1);color:var(--pink)}
+.ai-note{font-size:12.5px;color:var(--text2);line-height:1.65;margin-bottom:11px}
+.btn-add-ai{padding:7px 14px;font-size:12.5px;font-weight:700;background:none;border:1px solid var(--border2);border-radius:var(--r);color:var(--text);cursor:pointer;font-family:var(--font);transition:all .15s}
+.btn-add-ai:hover{border-color:var(--accent);color:var(--accent)}
+.ld-row{display:flex;align-items:center;gap:8px;color:var(--text2);font-size:13px}
+.spin{width:13px;height:13px;border:2px solid var(--bg5);border-top-color:var(--accent);border-radius:50%;animation:sp .55s linear infinite;flex-shrink:0}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* photo in ai */
+.photo-drop{border:1.5px dashed var(--border2);border-radius:var(--r);padding:16px;text-align:center;cursor:pointer;transition:all .2s;position:relative;margin-bottom:10px}
+.photo-drop:hover,.photo-drop.dragover{border-color:var(--accent);background:var(--accent-bg)}
+.photo-drop input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.photo-drop-icon{font-size:22px;margin-bottom:5px}
+.photo-drop p{font-size:12.5px;color:var(--text2)}
+.photo-drop small{font-size:11px;color:var(--text3)}
+#photoPreviewImg{width:100%;max-height:180px;object-fit:cover;border-radius:var(--r);display:none;margin-bottom:9px}
+
+/* settings overlay */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:50;display:none;align-items:flex-end;justify-content:center;padding:16px}
+.overlay.open{display:flex;animation:fi .2s ease}
+.sheet{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--rl);padding:22px;width:100%;max-width:440px;animation:su .22s ease}
+@keyframes su{from{transform:translateY(18px);opacity:0}to{transform:translateY(0);opacity:1}}
+.sheet h3{font-size:15px;font-weight:900;margin-bottom:16px;letter-spacing:-0.3px}
+.sfg{margin-bottom:11px}
+.sfg label{display:block;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px}
+.sfg input{width:100%;padding:9px 12px;font-size:14px;font-family:var(--font);background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);outline:none;transition:border .2s}
+.sfg input:focus{border-color:var(--accent)}
+.ssub{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 8px}
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.srow{display:flex;gap:8px;margin-top:16px}
+.btn-sv{flex:1;padding:11px;background:var(--accent);color:#0a0a0c;border:none;border-radius:var(--r);font-family:var(--font);font-size:13px;font-weight:800;cursor:pointer;transition:all .2s}
+.btn-sv:hover{background:#c8ff5a}
+.btn-cx{padding:11px 14px;background:none;border:1px solid var(--border);border-radius:var(--r);color:var(--text2);font-family:var(--font);font-size:13px;cursor:pointer}
+
+/* bottom nav */
+.bnav{position:fixed;bottom:0;left:0;right:0;background:rgba(10,10,12,.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;justify-content:center;z-index:40}
+.bnav-inner{display:flex;max-width:640px;width:100%}
+.nb{flex:1;padding:11px 8px 16px;background:none;border:none;cursor:pointer;font-family:var(--font);font-size:9.5px;font-weight:700;color:var(--text3);display:flex;flex-direction:column;align-items:center;gap:4px;transition:color .15s;text-transform:uppercase;letter-spacing:.4px}
+.nb.active{color:var(--accent)}
+.nb-icon{font-size:19px;line-height:1}
+</style>
+</head>
+<body>
+
+<!-- SETUP -->
+<div id="setup">
+  <div class="setup-wrap">
+    <div class="setup-logo">NT</div>
+    <h1>NutriTrack</h1>
+    <p>Personīgais AI uztura trackeris.<br>Ievadi Anthropic API atslēgu, lai sāktu.</p>
+    <div class="setup-steps">
+      <div class="ss"><div class="ss-n">1</div><p>Atver <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> un reģistrējies</p></div>
+      <div class="ss"><div class="ss-n">2</div><p>Sadaļā <strong style="color:var(--text)">API Keys</strong> izveido atslēgu — sākas ar <code>sk-ant-</code></p></div>
+      <div class="ss"><div class="ss-n">3</div><p>Iekopē zemāk. Tiek saglabāts tikai tavā pārlūkā.</p></div>
+    </div>
+    <input class="inp" type="password" id="setupKey" placeholder="sk-ant-api03-..." autocomplete="off" onkeydown="if(event.key==='Enter')saveKey()">
+    <button class="btn-p" onclick="saveKey()">Sākt lietot →</button>
+    <div class="setup-note">Atslēga glabājas tikai tava pārlūka localStorage.</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="app-bar">
+    <div class="app-logo"><span class="logo-pip"></span>NutriTrack</div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span class="hdate" id="hdate"></span>
+      <button class="icon-btn" onclick="openSettings()">⚙</button>
+    </div>
+  </div>
+  <div class="tabs-bar">
+    <div class="tabs">
+      <button class="tab active" onclick="goTab('today')">Šodiena</button>
+      <button class="tab" onclick="goTab('month')">Mēnesis</button>
+      <button class="tab" onclick="goTab('ai')">AI palīgs</button>
+    </div>
+  </div>
+
+  <!-- TODAY -->
+  <div id="tab-today" class="sec active">
+    <div class="mc-grid" id="mcCards"></div>
+    <div class="panel">
+      <div class="panel-hd"><span class="panel-icon">+</span>Pievienot ēdienreizi</div>
+      <div class="frow">
+        <div class="fg" style="flex:1"><label>Produkts / ēdiens</label><input type="text" id="mName" placeholder="Piemēram: vistas krūtiņa 180g"></div>
+        <div class="fg" style="width:126px;flex-shrink:0"><label>Ēdienreize</label>
+          <select id="mTime"><option>Brokastis</option><option>Uzkoda</option><option selected>Pusdienas</option><option>Pēcpusdiena</option><option>Vakariņas</option><option>Pirms gulēt</option></select>
+        </div>
+      </div>
+      <div class="fgrid">
+        <div class="fg"><label>Kcal</label><input type="number" id="mKcal" placeholder="0" min="0"></div>
+        <div class="fg"><label>Proteīns g</label><input type="number" id="mProt" placeholder="0" min="0"></div>
+        <div class="fg"><label>Ogļhidrāti g</label><input type="number" id="mCarb" placeholder="0" min="0"></div>
+        <div class="fg"><label>Tauki g</label><input type="number" id="mFat" placeholder="0" min="0"></div>
+      </div>
+      <button class="btn-add" onclick="addMeal()" style="margin-bottom:14px">Pievienot ēdienreizi</button>
+      <div class="ql">Bieži lietotie (no vēstures)</div>
+      <div class="qrow" id="qrow"></div>
+    </div>
+    <div class="list-hd">
+      <div class="list-lbl">Šodienas ēdienreizes</div>
+      <button class="clr-btn" onclick="clearToday()">Dzēst visu</button>
+    </div>
+    <div class="meals" id="mealsList"></div>
+  </div>
+
+  <!-- MONTH -->
+  <div id="tab-month" class="sec">
+    <div class="month-hd">
+      <div class="month-title" id="monthTitle"></div>
+      <div class="month-nav">
+        <button class="mnav-btn" onclick="changeMonth(-1)">‹</button>
+        <button class="mnav-btn" onclick="changeMonth(1)">›</button>
+      </div>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+    <div class="day-detail" id="dayDetail">
+      <div class="dd-hd">
+        <div class="dd-title" id="ddTitle"></div>
+        <button class="dd-close" onclick="closeDayDetail()">×</button>
+      </div>
+      <div class="dd-mc" id="ddMacros"></div>
+      <div class="list-lbl" style="margin-bottom:9px">Ēdienreizes</div>
+      <div class="dd-meals" id="ddMeals"></div>
+    </div>
+    <div class="list-lbl" style="margin-bottom:10px">Mēneša kopsavilkums</div>
+    <div class="month-sum" id="monthSum"></div>
+  </div>
+
+  <!-- AI -->
+  <div id="tab-ai" class="sec">
+    <div class="ai-panel">
+      <div class="ai-hd"><span class="ai-badge">AI</span><h3>Foto analīze</h3></div>
+      <img id="photoPreviewImg" alt="Ēdiena foto">
+      <div class="photo-drop" id="photoDrop">
+        <input type="file" accept="image/*" id="photoFile" onchange="onPhotoSelect(event)">
+        <div class="photo-drop-icon">📷</div>
+        <p>Nofotografē šķīvi vai ievelc attēlu šeit</p>
+        <small>JPG, PNG, HEIC · maks. 5MB</small>
+      </div>
+      <button class="btn-an" id="btnPhoto" onclick="analyzePhoto()" style="width:100%;display:none">Analizēt foto →</button>
+      <div class="ai-res" id="aiPhotoRes"></div>
+    </div>
+    <div class="ai-panel">
+      <div class="ai-hd"><span class="ai-badge">AI</span><h3>Teksta analīze</h3></div>
+      <div class="ai-row">
+        <input type="text" id="aiTxt" placeholder="Apraksti ēdienu brīvā tekstā..." onkeydown="if(event.key==='Enter')analyzeText()">
+        <button class="btn-an" id="btnTxt" onclick="analyzeText()">Analizēt</button>
+      </div>
+      <div class="ai-res" id="aiTxtRes"></div>
+    </div>
+    <div class="ai-panel">
+      <div class="ai-hd"><span class="ai-badge">AI</span><h3>Uztura speciālists</h3></div>
+      <div class="ai-row">
+        <input type="text" id="aiAdv" placeholder="Uzdod jautājumu par uzturu..." onkeydown="if(event.key==='Enter')getAdvice()">
+        <button class="btn-an" id="btnAdv" onclick="getAdvice()">Jautāt</button>
+      </div>
+      <div class="ai-res" id="aiAdvRes"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="overlay" id="settingsOv" onclick="ovClick(event)">
+  <div class="sheet">
+    <h3>Iestatījumi</h3>
+    <div class="sfg"><label>API atslēga</label><input type="password" id="sKey" placeholder="sk-ant-..."></div>
+    <div class="ssub">Dienas mērķi</div>
+    <div class="sgrid">
+      <div class="sfg"><label>Kcal</label><input type="number" id="sKcal"></div>
+      <div class="sfg"><label>Proteīns g</label><input type="number" id="sProt"></div>
+      <div class="sfg"><label>Ogļhidrāti g</label><input type="number" id="sCarb"></div>
+      <div class="sfg"><label>Tauki g</label><input type="number" id="sFat"></div>
+    </div>
+    <div class="srow">
+      <button class="btn-cx" onclick="closeSettings()">Atcelt</button>
+      <button class="btn-sv" onclick="saveSettings()">Saglabāt</button>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bnav">
+  <div class="bnav-inner">
+    <button class="nb active" id="nb-today" onclick="goTab('today')"><span class="nb-icon">◎</span>Šodiena</button>
+    <button class="nb" id="nb-month" onclick="goTab('month')"><span class="nb-icon">▦</span>Mēnesis</button>
+    <button class="nb" id="nb-ai" onclick="goTab('ai')"><span class="nb-icon">✦</span>AI palīgs</button>
+  </div>
+</div>
+
+<script>
+const DEF={kcal:2500,prot:170,carb:300,fat:69};
+const DOW=['P','O','T','C','Pk','S','Sv'];
+const MONTHS=['Janvāris','Februāris','Marts','Aprīlis','Maijs','Jūnijs','Jūlijs','Augusts','Septembris','Oktobris','Novembris','Decembris'];
+
+let viewMonth=new Date();viewMonth.setDate(1);
+let photoB64=null;photoB64Type=null;
+
+// ── STORAGE ──
+const getKey=()=>localStorage.getItem('nt_key')||'';
+const getTarget=()=>{try{return JSON.parse(localStorage.getItem('nt_tgt')||'null')||DEF}catch(e){return DEF}};
+const todayKey=()=>new Date().toISOString().slice(0,10);
+const getMeals=d=>{try{return JSON.parse(localStorage.getItem('nt_m_'+d)||'[]')}catch(e){return[]}};
+const saveMeals=(d,m)=>localStorage.setItem('nt_m_'+d,JSON.stringify(m));
+const sum=meals=>meals.reduce((a,m)=>({kcal:a.kcal+m.kcal,prot:a.prot+m.prot,carb:a.carb+m.carb,fat:a.fat+m.fat}),{kcal:0,prot:0,carb:0,fat:0});
+const pct=(v,t)=>Math.min(100,Math.round(v/t*100));
+
+// ── INIT ──
+function init(){
+  if(getKey().startsWith('sk-ant-')){showApp();}
+  const d=new Date();
+  document.getElementById('hdate').textContent=d.toLocaleDateString('lv-LV',{weekday:'short',month:'short',day:'numeric'});
+}
+
+function saveKey(){
+  const k=document.getElementById('setupKey').value.trim();
+  if(!k.startsWith('sk-ant-')){alert('Atslēgai jāsākas ar sk-ant-');return;}
+  localStorage.setItem('nt_key',k);showApp();
+}
+
+function showApp(){
+  document.getElementById('setup').style.display='none';
+  document.getElementById('app').style.display='block';
+  renderCards();renderMeals();renderQuick();
+}
+
+// ── TODAY ──
+function renderCards(){
+  const t=sum(getMeals(todayKey()));const T=getTarget();
+  const rem=Math.max(0,T.kcal-t.kcal);
+  document.getElementById('mcCards').innerHTML=`
+    <div class="mc k"><div class="mc-lbl">Kalorijas</div><div class="mc-val">${t.kcal}</div><div class="mc-sub">Atlicis: ${rem}</div><div class="mc-bar"><div class="mc-fill" style="width:${pct(t.kcal,T.kcal)}%;background:var(--green)"></div></div></div>
+    <div class="mc p"><div class="mc-lbl">Proteīns</div><div class="mc-val">${t.prot}g</div><div class="mc-sub">${pct(t.prot,T.prot)}% mērķa</div><div class="mc-bar"><div class="mc-fill" style="width:${pct(t.prot,T.prot)}%;background:var(--blue)"></div></div></div>
+    <div class="mc c"><div class="mc-lbl">Ogļhidrāti</div><div class="mc-val">${t.carb}g</div><div class="mc-sub">${pct(t.carb,T.carb)}% mērķa</div><div class="mc-bar"><div class="mc-fill" style="width:${pct(t.carb,T.carb)}%;background:var(--amber)"></div></div></div>
+    <div class="mc f"><div class="mc-lbl">Tauki</div><div class="mc-val">${t.fat}g</div><div class="mc-sub">${pct(t.fat,T.fat)}% mērķa</div><div class="mc-bar"><div class="mc-fill" style="width:${pct(t.fat,T.fat)}%;background:var(--pink)"></div></div></div>`;
+}
+
+function renderMeals(){
+  const meals=getMeals(todayKey());
+  const el=document.getElementById('mealsList');
+  if(!meals.length){el.innerHTML='<div class="empty"><div class="empty-i">🥗</div><p style="font-size:13.5px;line-height:1.6">Nav pievienotu ēdienreižu šodien.</p></div>';return;}
+  el.innerHTML=meals.map((m,i)=>`
+    <div class="meal-item">
+      <span class="meal-badge">${m.time}</span>
+      ${m.img?`<img class="meal-thumb" src="${m.img}" alt="">`:''}
+      <div class="meal-info">
+        <div class="meal-name">${m.name}</div>
+        <div class="meal-macros">
+          <span><span class="mdot" style="background:var(--blue)"></span>P:${m.prot}g</span>
+          <span><span class="mdot" style="background:var(--amber)"></span>C:${m.carb}g</span>
+          <span><span class="mdot" style="background:var(--pink)"></span>T:${m.fat}g</span>
+        </div>
+      </div>
+      <div class="meal-k">${m.kcal}</div>
+      <button class="del-btn" onclick="delMeal(${i})">×</button>
+    </div>`).join('');
+}
+
+// ── SMART QUICK ADD (from history) ──
+function getFrequent(){
+  const counts={};
+  // scan last 60 days
+  for(let i=0;i<60;i++){
+    const d=new Date();d.setDate(d.getDate()-i);
+    const key=d.toISOString().slice(0,10);
+    getMeals(key).forEach(m=>{
+      const k=m.name.toLowerCase();
+      if(!counts[k]){counts[k]={name:m.name,kcal:m.kcal,prot:m.prot,carb:m.carb,fat:m.fat,count:0};}
+      counts[k].count++;
+    });
+  }
+  return Object.values(counts).sort((a,b)=>b.count-a.count).slice(0,10);
+}
+
+function renderQuick(){
+  const freq=getFrequent();
+  const el=document.getElementById('qrow');
+  if(!freq.length){
+    el.innerHTML='<span class="qchip-empty">Pievienojot ēdienreizes, šeit parādīsies bieži lietotie</span>';return;
+  }
+  el.innerHTML=freq.map(q=>`<button class="qchip" onclick="quickFill('${q.name.replace(/'/g,"\\'")}',${q.kcal},${q.prot},${q.carb},${q.fat})">+ ${q.name}</button>`).join('');
+}
+
+function quickFill(name,kcal,prot,carb,fat){
+  document.getElementById('mName').value=name;
+  document.getElementById('mKcal').value=kcal;
+  document.getElementById('mProt').value=prot;
+  document.getElementById('mCarb').value=carb;
+  document.getElementById('mFat').value=fat;
+}
+
+function addMeal(extra){
+  const name=(extra&&extra.name)||document.getElementById('mName').value.trim();
+  if(!name){document.getElementById('mName').focus();return;}
+  const meals=getMeals(todayKey());
+  meals.push({
+    name,
+    kcal:parseInt((extra&&extra.kcal!=null?extra.kcal:document.getElementById('mKcal').value))||0,
+    prot:parseInt((extra&&extra.prot!=null?extra.prot:document.getElementById('mProt').value))||0,
+    carb:parseInt((extra&&extra.carb!=null?extra.carb:document.getElementById('mCarb').value))||0,
+    fat:parseInt((extra&&extra.fat!=null?extra.fat:document.getElementById('mFat').value))||0,
+    time:document.getElementById('mTime').value,
+    img:extra&&extra.img||null
+  });
+  saveMeals(todayKey(),meals);
+  if(!extra)['mName','mKcal','mProt','mCarb','mFat'].forEach(id=>document.getElementById(id).value='');
+  renderCards();renderMeals();renderQuick();
+}
+
+function delMeal(i){const m=getMeals(todayKey());m.splice(i,1);saveMeals(todayKey(),m);renderCards();renderMeals();renderQuick();}
+function clearToday(){if(!confirm('Dzēst visas šodienas ēdienreizes?'))return;saveMeals(todayKey(),[]);renderCards();renderMeals();renderQuick();}
+
+// ── MONTH ──
+function renderMonth(){
+  const T=getTarget();
+  const y=viewMonth.getFullYear(),mo=viewMonth.getMonth();
+  document.getElementById('monthTitle').textContent=`${MONTHS[mo]} ${y}`;
+  const firstDow=(new Date(y,mo,1).getDay()+6)%7;
+  const daysInMonth=new Date(y,mo+1,0).getDate();
+  const todayStr=todayKey();
+  let html='';
+  DOW.forEach(d=>{html+=`<div class="cal-dow">${d}</div>`;});
+  for(let i=0;i<firstDow;i++)html+='<div class="cal-day empty-day"></div>';
+  let totK=0,totP=0,totC=0,totF=0,activeDays=0;
+  for(let d=1;d<=daysInMonth;d++){
+    const key=`${y}-${String(mo+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const meals=getMeals(key);const t=sum(meals);
+    const isToday=key===todayStr;
+    const hasData=meals.length>0;
+    if(hasData){totK+=t.kcal;totP+=t.prot;totC+=t.carb;totF+=t.fat;activeDays++;}
+    const fillP=hasData?pct(t.kcal,T.kcal):0;
+    html+=`<div class="cal-day${isToday?' today':''}${hasData?' has-data':''}" onclick="openDay('${key}',${d})">
+      <div class="cd-n">${d}</div>
+      <div class="cd-k">${hasData?t.kcal:''}</div>
+      <div class="cd-bar"><div class="cd-fill" style="width:${fillP}%"></div></div>
+    </div>`;
+  }
+  document.getElementById('calGrid').innerHTML=html;
+  const avg=v=>activeDays?Math.round(v/activeDays):0;
+  document.getElementById('monthSum').innerHTML=`
+    <div class="ms-card"><div class="ms-lbl">Kopā kcal</div><div class="ms-val" style="color:var(--green)">${totK}</div><div class="ms-sub">${activeDays} dienas</div></div>
+    <div class="ms-card"><div class="ms-lbl">Vidēji kcal</div><div class="ms-val">${avg(totK)}</div><div class="ms-sub">Mērķis: ${T.kcal}</div></div>
+    <div class="ms-card"><div class="ms-lbl">Vidēji proteīns</div><div class="ms-val" style="color:var(--blue)">${avg(totP)}g</div><div class="ms-sub">Mērķis: ${T.prot}g</div></div>
+    <div class="ms-card"><div class="ms-lbl">Mērķa izpilde</div><div class="ms-val" style="color:var(--accent)">${avg(totK)?Math.round(avg(totK)/T.kcal*100):0}%</div><div class="ms-sub">kaloriju mērķis</div></div>`;
+}
+
+function openDay(key,d){
+  const meals=getMeals(key);
+  const t=sum(meals);
+  const T=getTarget();
+  const [y,mo]=key.split('-');
+  document.getElementById('ddTitle').textContent=`${d}. ${MONTHS[parseInt(mo)-1]}`;
+  document.getElementById('ddMacros').innerHTML=`
+    <div class="dd-card"><div class="dd-lbl">Kcal</div><div class="dd-val" style="color:var(--green)">${t.kcal}</div></div>
+    <div class="dd-card"><div class="dd-lbl">Proteīns</div><div class="dd-val" style="color:var(--blue)">${t.prot}g</div></div>
+    <div class="dd-card"><div class="dd-lbl">Ogļhidr.</div><div class="dd-val" style="color:var(--amber)">${t.carb}g</div></div>
+    <div class="dd-card"><div class="dd-lbl">Tauki</div><div class="dd-val" style="color:var(--pink)">${t.fat}g</div></div>`;
+  if(!meals.length){
+    document.getElementById('ddMeals').innerHTML='<div style="font-size:13px;color:var(--text2);padding:10px 0">Nav ēdienreižu šajā dienā.</div>';
+  } else {
+    document.getElementById('ddMeals').innerHTML=meals.map(m=>`
+      <div class="dd-meal">
+        <div class="dd-meal-name">${m.name}</div>
+        <div class="dd-meal-time">${m.time}</div>
+        <div class="dd-meal-k">${m.kcal}</div>
+      </div>`).join('');
+  }
+  // mark selected
+  document.querySelectorAll('.cal-day').forEach(el=>el.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+  const dd=document.getElementById('dayDetail');
+  dd.classList.add('open');
+  dd.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function closeDayDetail(){
+  document.getElementById('dayDetail').classList.remove('open');
+  document.querySelectorAll('.cal-day').forEach(el=>el.classList.remove('selected'));
+}
+
+function changeMonth(dir){
+  viewMonth.setMonth(viewMonth.getMonth()+dir);
+  closeDayDetail();renderMonth();
+}
+
+// ── PHOTO ──
+function onPhotoSelect(e){
+  const file=e.target.files[0];if(!file)return;
+  if(file.size>5*1024*1024){alert('Fails pārāk liels (maks. 5MB)');return;}
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const src=ev.target.result;
+    photoB64=src.split(',')[1];
+    photoB64Type=file.type;
+    const img=document.getElementById('photoPreviewImg');
+    img.src=src;img.style.display='block';
+    document.getElementById('photoDrop').style.display='none';
+    document.getElementById('btnPhoto').style.display='block';
+  };
+  reader.readAsDataURL(file);
+}
+
+async function analyzePhoto(){
+  if(!photoB64){return;}
+  const btn=document.getElementById('btnPhoto');
+  const res=document.getElementById('aiPhotoRes');
+  btn.disabled=true;res.className='ai-res show';
+  res.innerHTML='<div class="ld-row"><div class="spin"></div>Analizē foto ar AI...</div>';
+  const T=getTarget();
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':getKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',max_tokens:1000,
+        system:`Tu esi uztura speciālists. Lietotājam alerģija uz olām, govs pienu, kviešu miltiem. Mērķi: ${T.kcal} kcal, ${T.prot}g proteīns. Atbildi TIKAI ar JSON bez markdown: {"name":"ēdiena nosaukums","kcal":skaitlis,"prot":skaitlis,"carb":skaitlis,"fat":skaitlis,"note":"komentārs latviski par ēdienu un piemērotību mērķiem"}`,
+        messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:photoB64Type,data:photoB64}},{type:'text',text:'Analizē šī attēlā redzamo ēdienu un aprēķini uzturvērtības.'}]}]
+      })
+    });
+    const data=await r.json();
+    const text=data.content.map(c=>c.text||'').join('');
+    const p=JSON.parse(text.replace(/```json|```/g,'').trim());
+    const imgSrc=document.getElementById('photoPreviewImg').src;
+    res.innerHTML=`<div class="ai-card">
+      <div class="ai-rn">${p.name}</div>
+      <div class="ai-chips"><span class="aic k">${p.kcal} kcal</span><span class="aic p">P: ${p.prot}g</span><span class="aic c">C: ${p.carb}g</span><span class="aic f">T: ${p.fat}g</span></div>
+      <div class="ai-note">${p.note}</div>
+      <button class="btn-add-ai" onclick='addFromAI(${JSON.stringify({...p,img:imgSrc}).replace(/'/g,"&#39;")})'>+ Pievienot šodienas sarakstam</button>
+    </div>`;
+  }catch(e){res.innerHTML='<div style="color:var(--red);font-size:12.5px">Kļūda. Pārbaudi API atslēgu iestatījumos.</div>';}
+  btn.disabled=false;
+}
+
+// reset photo UI
+function resetPhoto(){
+  photoB64=null;photoB64Type=null;
+  document.getElementById('photoPreviewImg').style.display='none';
+  document.getElementById('photoPreviewImg').src='';
+  document.getElementById('photoDrop').style.display='block';
+  document.getElementById('btnPhoto').style.display='none';
+  document.getElementById('photoFile').value='';
+  document.getElementById('aiPhotoRes').className='ai-res';
+}
+
+async function analyzeText(){
+  const input=document.getElementById('aiTxt').value.trim();if(!input)return;
+  const T=getTarget();
+  const text=await aiCall(
+    `Tu esi uztura speciālists. Alerģija: olas, govs piens, kviešu milti. Mērķi: ${T.kcal} kcal, ${T.prot}g proteīns. Atbildi TIKAI ar JSON bez markdown: {"name":"nosaukums","kcal":skaitlis,"prot":skaitlis,"carb":skaitlis,"fat":skaitlis,"note":"komentārs latviski"}`,
+    `Analizē: ${input}`,'btnTxt','aiTxtRes'
+  );
+  if(!text)return;
+  try{
+    const p=JSON.parse(text.replace(/```json|```/g,'').trim());
+    document.getElementById('aiTxtRes').innerHTML=`<div class="ai-card">
+      <div class="ai-rn">${p.name}</div>
+      <div class="ai-chips"><span class="aic k">${p.kcal} kcal</span><span class="aic p">P: ${p.prot}g</span><span class="aic c">C: ${p.carb}g</span><span class="aic f">T: ${p.fat}g</span></div>
+      <div class="ai-note">${p.note}</div>
+      <button class="btn-add-ai" onclick='addFromAI(${JSON.stringify(p).replace(/'/g,"&#39;")})'>+ Pievienot šodienas sarakstam</button>
+    </div>`;
+  }catch(e){document.getElementById('aiTxtRes').innerHTML='<div style="color:var(--red);font-size:12.5px">Kļūda parsējot. Mēģini vēlreiz.</div>';}
+}
+
+function addFromAI(p){
+  addMeal({name:p.name,kcal:p.kcal,prot:p.prot,carb:p.carb,fat:p.fat,img:p.img||null});
+  goTab('today');
+}
+
+async function getAdvice(){
+  const input=document.getElementById('aiAdv').value.trim();if(!input)return;
+  const T=getTarget();const t=sum(getMeals(todayKey()));
+  const text=await aiCall(
+    `Tu esi fitnesa uztura speciālists. Lietotājs: vīrietis, 32g, 84.8kg, 182cm, rekomposīcija. Alerģija: olas, govs piens, kviešu milti. Mērķi: ${T.kcal} kcal, ${T.prot}g proteīns. Atbildi latviski, konkrēti, max 4-5 teikumi.`,
+    `Šodien: ${t.kcal} kcal, ${t.prot}g proteīna. ${input}`,'btnAdv','aiAdvRes'
+  );
+  if(text)document.getElementById('aiAdvRes').innerHTML=`<div class="ai-card"><div style="font-size:13px;line-height:1.7;color:var(--text2)">${text.replace(/\n/g,'<br>')}</div></div>`;
+}
+
+async function aiCall(sys,usr,btnId,resId){
+  const btn=document.getElementById(btnId);
+  const res=document.getElementById(resId);
+  btn.disabled=true;res.className='ai-res show';
+  res.innerHTML='<div class="ld-row"><div class="spin"></div>Analizē ar AI...</div>';
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':getKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:sys,messages:[{role:'user',content:usr}]})
+    });
+    const data=await r.json();
+    return data.content.map(c=>c.text||'').join('');
+  }catch(e){res.innerHTML='<div style="color:var(--red);font-size:12.5px">Kļūda. Pārbaudi API atslēgu.</div>';return null;}
+  finally{btn.disabled=false;}
+}
+
+// ── NAV ──
+function goTab(tab){
+  const tabs=['today','month','ai'];
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',tabs[i]===tab));
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach((b,i)=>b.classList.toggle('active',tabs[i]===tab));
+  document.getElementById('tab-'+tab).classList.add('active');
+  if(tab==='month')renderMonth();
+  if(tab==='ai')resetPhoto();
+}
+
+// ── SETTINGS ──
+function openSettings(){
+  const T=getTarget();
+  document.getElementById('sKey').value=getKey();
+  document.getElementById('sKcal').value=T.kcal;
+  document.getElementById('sProt').value=T.prot;
+  document.getElementById('sCarb').value=T.carb;
+  document.getElementById('sFat').value=T.fat;
+  document.getElementById('settingsOv').classList.add('open');
+}
+function closeSettings(){document.getElementById('settingsOv').classList.remove('open');}
+function ovClick(e){if(e.target.id==='settingsOv')closeSettings();}
+function saveSettings(){
+  const k=document.getElementById('sKey').value.trim();
+  if(k)localStorage.setItem('nt_key',k);
+  localStorage.setItem('nt_tgt',JSON.stringify({
+    kcal:parseInt(document.getElementById('sKcal').value)||DEF.kcal,
+    prot:parseInt(document.getElementById('sProt').value)||DEF.prot,
+    carb:parseInt(document.getElementById('sCarb').value)||DEF.carb,
+    fat:parseInt(document.getElementById('sFat').value)||DEF.fat
+  }));
+  closeSettings();renderCards();
+}
+
+init();
+</script>
+</body>
+</html>
